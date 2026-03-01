@@ -112,6 +112,10 @@
             box-shadow: 0 0 0 3px rgba(30,47,77,0.1);
         }
 
+        input::placeholder {
+            color: #9aa9bd;
+        }
+
         .section-title {
             grid-column: span 2;
             font-weight: 700;
@@ -119,10 +123,6 @@
             margin-top: 10px;
             border-bottom: 2px solid #dde3ec;
             padding-bottom: 4px;
-        }
-
-        .full-width {
-            grid-column: span 2;
         }
 
         .exportBtn {
@@ -192,22 +192,22 @@
 
         <div>
             <label>RDP Bricks (R3.50 each)</label>
-            <input type="number" id="rdp" min="0" value="0">
+            <input type="number" id="rdp" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Paving Bricks (R1.90 each)</label>
-            <input type="number" id="paving" min="0" value="0">
+            <input type="number" id="paving" min="0" placeholder="0">
         </div>
 
         <div>
             <label>ForeHalves Bricks (R1.80 each)</label>
-            <input type="number" id="forehalves" min="0" value="0">
+            <input type="number" id="forehalves" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Blocks (R5.50 each)</label>
-            <input type="number" id="blocks" min="0" value="0">
+            <input type="number" id="blocks" min="0" placeholder="0">
         </div>
 
         <!-- SAND & STONES -->
@@ -215,42 +215,42 @@
 
         <div>
             <label>River Sand (Full Loads - R900)</label>
-            <input type="number" id="riverFull" min="0" value="0">
+            <input type="number" id="riverFull" min="0" placeholder="0">
         </div>
 
         <div>
             <label>River Sand (Half Loads - R500)</label>
-            <input type="number" id="riverHalf" min="0" value="0">
+            <input type="number" id="riverHalf" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Concrete Sand (Full Loads - R900)</label>
-            <input type="number" id="concreteFull" min="0" value="0">
+            <input type="number" id="concreteFull" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Concrete Sand (Half Loads - R500)</label>
-            <input type="number" id="concreteHalf" min="0" value="0">
+            <input type="number" id="concreteHalf" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Bou Sand (Full Loads - R700)</label>
-            <input type="number" id="bouFull" min="0" value="0">
+            <input type="number" id="bouFull" min="0" placeholder="0">
         </div>
 
         <div>
             <label>Bou Sand (Half Loads - R500)</label>
-            <input type="number" id="bouHalf" min="0" value="0">
+            <input type="number" id="bouHalf" min="0" placeholder="0">
         </div>
 
         <div>
             <label>River Stones (Full Loads - R900)</label>
-            <input type="number" id="stonesFull" min="0" value="0">
+            <input type="number" id="stonesFull" min="0" placeholder="0">
         </div>
 
         <div>
             <label>River Stones (Half Loads - R500)</label>
-            <input type="number" id="stonesHalf" min="0" value="0">
+            <input type="number" id="stonesHalf" min="0" placeholder="0">
         </div>
 
         <button class="exportBtn" onclick="generatePDF()">
