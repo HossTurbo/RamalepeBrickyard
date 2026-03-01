@@ -1,86 +1,267 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Ramalepe Brickyard System</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f2f4f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 1100px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            padding: 2rem 2rem 2.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #1e2f4d;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #5c6f87;
+            margin-bottom: 20px;
+        }
+
+        /* MODE BUTTONS */
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .buttons button {
+            background: none;
+            border: 2px solid #d0d9e4;
+            padding: 0.6rem 2rem;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e5c;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .buttons button:hover {
+            background: #1e2f4d;
+            color: white;
+            border-color: #1e2f4d;
+        }
+
+        #documentType {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: #eef2f6;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 10px auto 25px auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1f3a5f;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            padding: 10px 14px;
+            border: 1.5px solid #cfddee;
+            border-radius: 16px;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2b4f8e;
+            box-shadow: 0 0 0 3px rgba(30,47,77,0.1);
+        }
+
+        .section-title {
+            grid-column: span 2;
+            font-weight: 700;
+            color: #1e2f4d;
+            margin-top: 10px;
+            border-bottom: 2px solid #dde3ec;
+            padding-bottom: 4px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .exportBtn {
+            grid-column: span 2;
+            background: #1e2f4d;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 60px;
+            margin-top: 25px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .exportBtn:hover {
+            background: #2b405f;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .section-title,
+            .exportBtn {
+                grid-column: span 1;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <h1>RAMALEPE BRICKYARD</h1>
-    <p style="text-align:center;">Invoice & Quotation Generator</p>
+<div class="card">
+
+    <h1>⛰️ RAMALEPE BRICKYARD</h1>
+    <div class="subtitle">Invoice & Quotation Generator</div>
 
     <div class="buttons">
-        <button onclick="setMode('invoice')">Generate Invoice</button>
-        <button onclick="setMode('quotation')">Generate Quotation</button>
+        <button onclick="setMode('invoice')">📄 Invoice</button>
+        <button onclick="setMode('quotation')">📋 Quotation</button>
     </div>
 
-    <div class="form">
-
+    <div style="text-align:center;">
         <h2 id="documentType">Invoice</h2>
+    </div>
+
+    <div class="form-grid">
 
         <!-- CLIENT -->
-        <label>Client Name</label>
-        <input type="text" id="clientName" placeholder="Enter client name">
+        <div>
+            <label>Client Name</label>
+            <input type="text" id="clientName" placeholder="Enter client name">
+        </div>
 
         <!-- DELIVERY -->
-        <label>Delivery Type</label>
-        <select id="deliveryType">
-            <option value="local">Local Delivery</option>
-            <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
-        </select>
+        <div>
+            <label>Delivery Type</label>
+            <select id="deliveryType">
+                <option value="local">Local Delivery</option>
+                <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
+            </select>
+        </div>
 
         <!-- BRICKS -->
-        <h3>Bricks</h3>
+        <div class="section-title">🧱 Bricks</div>
 
-        <label>RDP Bricks (R3.50 each)</label>
-        <input type="number" id="rdp" min="0" value="0">
+        <div>
+            <label>RDP Bricks (R3.50 each)</label>
+            <input type="number" id="rdp" min="0" value="0">
+        </div>
 
-        <label>Paving Bricks (R1.90 each)</label>
-        <input type="number" id="paving" min="0" value="0">
+        <div>
+            <label>Paving Bricks (R1.90 each)</label>
+            <input type="number" id="paving" min="0" value="0">
+        </div>
 
-        <label>ForeHalves Bricks (R1.80 each)</label>
-        <input type="number" id="forehalves" min="0" value="0">
+        <div>
+            <label>ForeHalves Bricks (R1.80 each)</label>
+            <input type="number" id="forehalves" min="0" value="0">
+        </div>
 
-        <label>Blocks (R5.50 each)</label>
-        <input type="number" id="blocks" min="0" value="0">
+        <div>
+            <label>Blocks (R5.50 each)</label>
+            <input type="number" id="blocks" min="0" value="0">
+        </div>
 
         <!-- SAND & STONES -->
-        <h3>Sand & Stones</h3>
+        <div class="section-title">🪨 Sand & Stones</div>
 
-        <label>River Sand (Full Loads - R900)</label>
-        <input type="number" id="riverFull" min="0" value="0">
+        <div>
+            <label>River Sand (Full Loads - R900)</label>
+            <input type="number" id="riverFull" min="0" value="0">
+        </div>
 
-        <label>River Sand (Half Loads - R500)</label>
-        <input type="number" id="riverHalf" min="0" value="0">
+        <div>
+            <label>River Sand (Half Loads - R500)</label>
+            <input type="number" id="riverHalf" min="0" value="0">
+        </div>
 
-        <label>Concrete Sand (Full Loads - R900)</label>
-        <input type="number" id="concreteFull" min="0" value="0">
+        <div>
+            <label>Concrete Sand (Full Loads - R900)</label>
+            <input type="number" id="concreteFull" min="0" value="0">
+        </div>
 
-        <label>Concrete Sand (Half Loads - R500)</label>
-        <input type="number" id="concreteHalf" min="0" value="0">
+        <div>
+            <label>Concrete Sand (Half Loads - R500)</label>
+            <input type="number" id="concreteHalf" min="0" value="0">
+        </div>
 
-        <label>Bou Sand (Full Loads - R700)</label>
-        <input type="number" id="bouFull" min="0" value="0">
+        <div>
+            <label>Bou Sand (Full Loads - R700)</label>
+            <input type="number" id="bouFull" min="0" value="0">
+        </div>
 
-        <label>Bou Sand (Half Loads - R500)</label>
-        <input type="number" id="bouHalf" min="0" value="0">
+        <div>
+            <label>Bou Sand (Half Loads - R500)</label>
+            <input type="number" id="bouHalf" min="0" value="0">
+        </div>
 
-        <label>River Stones (Full Loads - R900)</label>
-        <input type="number" id="stonesFull" min="0" value="0">
+        <div>
+            <label>River Stones (Full Loads - R900)</label>
+            <input type="number" id="stonesFull" min="0" value="0">
+        </div>
 
-        <label>River Stones (Half Loads - R500)</label>
-        <input type="number" id="stonesHalf" min="0" value="0">
+        <div>
+            <label>River Stones (Half Loads - R500)</label>
+            <input type="number" id="stonesHalf" min="0" value="0">
+        </div>
 
         <button class="exportBtn" onclick="generatePDF()">
-            Generate & Share Document
+            📄 Generate & Share Document
         </button>
 
     </div>
 
-    <!-- jsPDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
