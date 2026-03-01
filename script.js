@@ -36,11 +36,11 @@ function generatePDF() {
 
     // ===== LOGO =====
     const img = new Image();
-    img.src = "assets/logo.png";
+    img.src = "assets/logo.jpeg";
 
     img.onload = function () {
 
-        doc.addImage(img, "PNG", 20, 15, 40, 30);
+        doc.addImage(img, "JPEG", 20, 15, 40, 30);
 
         // ===== COMPANY INFO =====
         doc.setFontSize(18);
