@@ -1,1 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Business Invoice System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <h1>Business Document Generator</h1>
+
+    <div class="buttons">
+        <button onclick="setMode('invoice')">Generate Invoice</button>
+        <button onclick="setMode('quotation')">Generate Quotation</button>
+    </div>
+
+    <div class="form">
+        <h2 id="documentType">Invoice</h2>
+
+        <label>Client Name:</label>
+        <input type="text" id="clientName" placeholder="Enter client name">
+
+        <h3>Products</h3>
+
+        <div class="product">
+            <label>Product A (R500)</label>
+            <input type="number" id="productA" min="0" value="0">
+        </div>
+
+        <div class="product">
+            <label>Product B (R750)</label>
+            <input type="number" id="productB" min="0" value="0">
+        </div>
+
+        <button class="exportBtn" onclick="generatePDF()">Export as PDF</button>
+    </div>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
