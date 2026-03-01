@@ -2,87 +2,74 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Ramalepe Brickyard System</title>
+    <title>Ramalepe Brickyard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body style="font-family: Arial, sans-serif; margin:40px;">
+    <h1 class="company-name">RAMALEPE BRICKYARD</h1>
 
-    <!-- COMPANY HEADER -->
-    <h1 style="text-align:center; font-weight:900;">
-        RAMALEPE BRICKYARD
-    </h1>
-
-    <p style="text-align:center;">
-        1594 Lephepane, Tzaneen, 0850<br>
-        Phone: 072 550 0640
-    </p>
-
-    <hr>
-
-    <!-- MODE BUTTONS -->
-    <div style="text-align:center; margin-bottom:20px;">
+    <div class="buttons">
         <button onclick="setMode('invoice')">Invoice</button>
         <button onclick="setMode('quotation')">Quotation</button>
     </div>
 
-    <h2 id="documentType">Invoice</h2>
+    <div class="form">
 
-    <!-- CLIENT -->
-    <label>Client Name:</label><br>
-    <input type="text" id="clientName" placeholder="Enter client name"><br><br>
+        <h2 id="documentType">Invoice</h2>
 
-    <!-- DELIVERY -->
-    <label>Delivery Type:</label><br>
-    <select id="deliveryType">
-        <option value="local">Local Delivery</option>
-        <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
-    </select>
+        <label>Client Name</label>
+        <input type="text" id="clientName" placeholder="Enter client name">
 
-    <hr>
+        <label>Delivery Type</label>
+        <select id="deliveryType">
+            <option value="local">Local Delivery</option>
+            <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
+        </select>
 
-    <h3>Bricks</h3>
+        <h3>Bricks</h3>
 
-    <label>RDP Bricks (R3.50 each)</label><br>
-    <input type="number" id="rdp" min="0" placeholder="Enter quantity"><br><br>
+        <label>RDP Bricks (R3.50 each)</label>
+        <input type="number" id="rdp" placeholder="Enter quantity">
 
-    <label>Paving Bricks (R1.90 each)</label><br>
-    <input type="number" id="paving" min="0" placeholder="Enter quantity"><br><br>
+        <label>Paving Bricks (R1.90 each)</label>
+        <input type="number" id="paving" placeholder="Enter quantity">
 
-    <label>ForeHalves Bricks (R1.80 each)</label><br>
-    <input type="number" id="forehalves" min="0" placeholder="Enter quantity"><br><br>
+        <label>ForeHalves Bricks (R1.80 each)</label>
+        <input type="number" id="forehalves" placeholder="Enter quantity">
 
-    <label>Blocks (R5.50 each)</label><br>
-    <input type="number" id="blocks" min="0" placeholder="Enter quantity"><br><br>
+        <label>Blocks (R5.50 each)</label>
+        <input type="number" id="blocks" placeholder="Enter quantity">
 
-    <hr>
+        <h3>Sand & Stones</h3>
 
-    <h3>Sand & Stones</h3>
+        <label>River Sand - Full Load (R900)</label>
+        <input type="number" id="riverFull" placeholder="Enter quantity">
 
-    <label>River Sand - Full Load (R900)</label><br>
-    <input type="number" id="riverFull" min="0" placeholder="Enter quantity"><br><br>
+        <label>River Sand - Half Load (R500)</label>
+        <input type="number" id="riverHalf" placeholder="Enter quantity">
 
-    <label>River Sand - Half Load (R500)</label><br>
-    <input type="number" id="riverHalf" min="0" placeholder="Enter quantity"><br><br>
+        <label>Concrete Sand - Full Load (R900)</label>
+        <input type="number" id="concreteFull" placeholder="Enter quantity">
 
-    <label>Concrete Sand - Full Load (R900)</label><br>
-    <input type="number" id="concreteFull" min="0" placeholder="Enter quantity"><br><br>
+        <label>Concrete Sand - Half Load (R500)</label>
+        <input type="number" id="concreteHalf" placeholder="Enter quantity">
 
-    <label>Concrete Sand - Half Load (R500)</label><br>
-    <input type="number" id="concreteHalf" min="0" placeholder="Enter quantity"><br><br>
+        <label>Bou Sand - Full Load (R700)</label>
+        <input type="number" id="bouFull" placeholder="Enter quantity">
 
-    <label>Bou Sand - Full Load (R700)</label><br>
-    <input type="number" id="bouFull" min="0" placeholder="Enter quantity"><br><br>
+        <label>Bou Sand - Half Load (R500)</label>
+        <input type="number" id="bouHalf" placeholder="Enter quantity">
 
-    <label>Bou Sand - Half Load (R500)</label><br>
-    <input type="number" id="bouHalf" min="0" placeholder="Enter quantity"><br><br>
+        <label>River Stones - Full Load (R900)</label>
+        <input type="number" id="stonesFull" placeholder="Enter quantity">
 
-    <label>River Stones - Full Load (R900)</label><br>
-    <input type="number" id="stonesFull" min="0" placeholder="Enter quantity"><br><br>
+        <label>River Stones - Half Load (R500)</label>
+        <input type="number" id="stonesHalf" placeholder="Enter quantity">
 
-    <label>River Stones - Half Load (R500)</label><br>
-    <input type="number" id="stonesHalf" min="0" placeholder="Enter quantity"><br><br>
+        <button onclick="generatePDF()">Generate Document</button>
 
-    <button onclick="generatePDF()">Generate & Share Document</button>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
