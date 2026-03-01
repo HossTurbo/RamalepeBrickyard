@@ -18,124 +18,193 @@ function getNextDocumentNumber() {
 }
 
 function generatePDF() {
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
     let client = document.getElementById("clientName").value || "N/A";
-    let qtyA = parseInt(document.getElementById("productA").value) || 0;
-    let qtyB = parseInt(document.getElementById("productB").value) || 0;
-
-    let priceA = 500;
-    let priceB = 750;
+    let deliveryType = document.getElementById("deliveryType").value;
+    let deliveryExtra = deliveryType === "distant" ? 100 : 0;
 
     let today = new Date().toLocaleDateString("en-ZA");
     let docNumber = getNextDocumentNumber();
     let title = mode === "invoice" ? "INVOICE" : "QUOTATION";
 
-    let y = 20;
+    // ===== BRICK UNIT PRICES =====
+    let brickPrices = {
+        rdp: 3.5,
+        paving: 1.9,
+        forehalves: 1.8,
+        blocks: 5.5
+    };
 
-    // ===== LOGO =====
-    const img = new Image();
-    img.src = "assets/logo.jpeg";
+    // ===== SAND PRICES =====
+    let sandPrices = {
+        riverFull: 900,
+        riverHalf: 500,
+        concreteFull: 900,
+        concreteHalf: 500,
+        bouFull: 700,
+        bouHalf: 500,
+        stonesFull: 900,
+        stonesHalf: 500
+    };
 
-    img.onload = function () {
+    const logoImg = new Image();
+    const signatureImg = new Image();
 
-        doc.addImage(img, "JPEG", 20, 15, 40, 30);
+    logoImg.src = "assets/logo.jpeg";
+    signatureImg.src = "assets/signature.png";
 
-        // ===== COMPANY INFO =====
-        doc.setFontSize(18);
-        doc.text("RAMALEPE BRICKYARD", 70, 25);
+    logoImg.onload = function () {
+        signatureImg.onload = function () {
 
-        doc.setFontSize(10);
-        doc.text("Quality Clay Brick Suppliers", 70, 32);
-        doc.text("123 Industrial Road, Limpopo, South Africa", 70, 37);
-        doc.text("Phone: 012 345 6789", 70, 42);
-        doc.text("Email: info@ramalepebrickyard.co.za", 70, 47);
+            let y = 20;
 
-        // ===== DOCUMENT INFO =====
-        doc.setFontSize(16);
-        doc.text(title, 150, 25);
+            // ===== LOGO =====
+            doc.addImage(logoImg, "JPEG", 20, 15, 40, 30);
 
-        doc.setFontSize(11);
-        doc.text("No: " + docNumber, 150, 33);
-        doc.text("Date: " + today, 150, 40);
+            // ===== COMPANY INFO =====
+            doc.setFontSize(18);
+            doc.text("RAMALEPE BRICKYARD", 70, 25);
 
-        y = 60;
-        doc.line(20, y, 190, y);
-        y += 10;
+            doc.setFontSize(10);
+            doc.text("Quality Brick Suppliers", 70, 32);
+            doc.text("1594 Lephepane, Tzaneen, 0850", 70, 37);
+            doc.text("Phone: 072 550 0640", 70, 42);
 
-        // ===== CLIENT =====
-        doc.setFontSize(12);
-        doc.text("Bill To:", 20, y);
-        y += 6;
-        doc.text(client, 20, y);
+            // ===== DOCUMENT INFO =====
+            doc.setFontSize(16);
+            doc.text(title, 150, 25);
 
-        y += 10;
-        doc.line(20, y, 190, y);
-        y += 10;
+            doc.setFontSize(11);
+            doc.text("No: " + docNumber, 150, 33);
+            doc.text("Date: " + today, 150, 40);
 
-        // ===== TABLE HEADER =====
-        doc.text("Item", 20, y);
-        doc.text("Qty", 120, y);
-        doc.text("Unit", 140, y);
-        doc.text("Total", 170, y);
-
-        y += 5;
-        doc.line(20, y, 190, y);
-        y += 10;
-
-        let grandTotal = 0;
-
-        if (qtyA > 0) {
-            let totalA = qtyA * priceA;
-            grandTotal += totalA;
-
-            doc.text("Product A", 20, y);
-            doc.text(qtyA.toString(), 120, y);
-            doc.text("R" + priceA.toFixed(2), 140, y);
-            doc.text("R" + totalA.toFixed(2), 170, y);
+            y = 60;
+            doc.line(20, y, 190, y);
             y += 10;
-        }
 
-        if (qtyB > 0) {
-            let totalB = qtyB * priceB;
-            grandTotal += totalB;
+            // ===== CLIENT =====
+            doc.setFontSize(12);
+            doc.text("Bill To:", 20, y);
+            y += 6;
+            doc.text(client, 20, y);
 
-            doc.text("Product B", 20, y);
-            doc.text(qtyB.toString(), 120, y);
-            doc.text("R" + priceB.toFixed(2), 140, y);
-            doc.text("R" + totalB.toFixed(2), 170, y);
             y += 10;
-        }
+            doc.line(20, y, 190, y);
+            y += 10;
 
-        doc.line(100, y, 190, y);
-        y += 10;
+            // ===== TABLE HEADER =====
+            doc.text("Item", 20, y);
+            doc.text("Qty", 110, y);
+            doc.text("Unit Price", 140, y);
+            doc.text("Total", 170, y);
 
-        doc.setFontSize(14);
-        doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
+            y += 5;
+            doc.line(20, y, 190, y);
+            y += 10;
 
-        y += 20;
+            let grandTotal = 0;
 
-        // ===== PAYMENT / TERMS =====
-        doc.setFontSize(10);
+            // ===== BRICKS =====
+            for (let key in brickPrices) {
 
-        if (mode === "invoice") {
-            doc.text("Payment Terms: 30 Days from Invoice Date", 20, y);
-            y += 6;
-            doc.text("Bank: Standard Bank", 20, y);
-            y += 6;
-            doc.text("Account Name: Ramalepe Brickyard", 20, y);
-            y += 6;
-            doc.text("Account No: 123456789", 20, y);
-        } else {
-            doc.text("Quotation Valid For: 14 Days", 20, y);
-        }
+                let qty = parseInt(document.getElementById(key).value) || 0;
 
-        y += 20;
+                if (qty > 0) {
 
-        doc.line(20, y, 80, y);
-        doc.text("Authorized Signature", 20, y + 5);
+                    let unit = brickPrices[key];
+                    let total = qty * unit;
+                    grandTotal += total;
 
-        doc.save(title + "_" + docNumber + ".pdf");
+                    doc.text(key.toUpperCase() + " Bricks", 20, y);
+                    doc.text(qty.toString(), 110, y);
+                    doc.text("R" + unit.toFixed(2), 140, y);
+                    doc.text("R" + total.toFixed(2), 170, y);
+
+                    y += 10;
+                }
+            }
+
+            // ===== SAND / STONES =====
+            for (let key in sandPrices) {
+
+                let qty = parseInt(document.getElementById(key).value) || 0;
+
+                if (qty > 0) {
+
+                    let basePrice = sandPrices[key];
+                    let finalPrice = basePrice + deliveryExtra;
+                    let total = qty * finalPrice;
+                    grandTotal += total;
+
+                    doc.text(key, 20, y);
+                    doc.text(qty.toString(), 110, y);
+                    doc.text("R" + finalPrice.toFixed(2), 140, y);
+                    doc.text("R" + total.toFixed(2), 170, y);
+
+                    y += 10;
+                }
+            }
+
+            doc.line(100, y, 190, y);
+            y += 10;
+
+            doc.setFontSize(14);
+            doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
+
+            // ===== PAYMENT DETAILS =====
+            y += 20;
+
+            if (mode === "invoice") {
+
+                doc.setFontSize(10);
+                doc.text("Payment Terms: 5 Days from Invoice Date", 20, y);
+                y += 6;
+                doc.text("Bank: Capitec Bank", 20, y);
+                y += 6;
+                doc.text("Account Name: Mr MC Ramalepe", 20, y);
+                y += 6;
+                doc.text("Account No: 1242187837", 20, y);
+                y += 6;
+                doc.text("Phone: 072 550 0640", 20, y);
+            } else {
+                doc.setFontSize(10);
+                doc.text("Quotation Valid For: 5 Days", 20, y);
+            }
+
+            // ===== FOOTER SIGNATURE =====
+            let pageHeight = doc.internal.pageSize.height;
+
+            doc.line(20, pageHeight - 45, 190, pageHeight - 45);
+
+            doc.addImage(signatureImg, "PNG", 20, pageHeight - 40, 40, 25);
+
+            doc.setFontSize(9);
+            doc.text("Authorized Digital Signature", 20, pageHeight - 12);
+            doc.text("Phone: 072 550 0640", 140, pageHeight - 12);
+
+            // ===== SAVE & SHARE =====
+            const pdfBlob = doc.output("blob");
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            const a = document.createElement("a");
+            a.href = pdfUrl;
+            a.download = title + "_" + docNumber + ".pdf";
+            a.click();
+
+            if (navigator.share) {
+                const file = new File([pdfBlob], title + "_" + docNumber + ".pdf", {
+                    type: "application/pdf",
+                });
+
+                navigator.share({
+                    title: title,
+                    text: "Document from Ramalepe Brickyard",
+                    files: [file]
+                });
+            }
+        };
     };
 }
