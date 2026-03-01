@@ -2,75 +2,83 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Ramalepe Brickyard</title>
+    <title>Ramalepe Brickyard System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1 class="company-name">RAMALEPE BRICKYARD</h1>
+    <h1>RAMALEPE BRICKYARD</h1>
+    <p style="text-align:center;">Invoice & Quotation Generator</p>
 
     <div class="buttons">
-        <button onclick="setMode('invoice')">Invoice</button>
-        <button onclick="setMode('quotation')">Quotation</button>
+        <button onclick="setMode('invoice')">Generate Invoice</button>
+        <button onclick="setMode('quotation')">Generate Quotation</button>
     </div>
 
     <div class="form">
 
         <h2 id="documentType">Invoice</h2>
 
+        <!-- CLIENT -->
         <label>Client Name</label>
         <input type="text" id="clientName" placeholder="Enter client name">
 
+        <!-- DELIVERY -->
         <label>Delivery Type</label>
         <select id="deliveryType">
             <option value="local">Local Delivery</option>
             <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
         </select>
 
+        <!-- BRICKS -->
         <h3>Bricks</h3>
 
         <label>RDP Bricks (R3.50 each)</label>
-        <input type="number" id="rdp" placeholder="Enter quantity">
+        <input type="number" id="rdp" min="0" value="0">
 
         <label>Paving Bricks (R1.90 each)</label>
-        <input type="number" id="paving" placeholder="Enter quantity">
+        <input type="number" id="paving" min="0" value="0">
 
         <label>ForeHalves Bricks (R1.80 each)</label>
-        <input type="number" id="forehalves" placeholder="Enter quantity">
+        <input type="number" id="forehalves" min="0" value="0">
 
         <label>Blocks (R5.50 each)</label>
-        <input type="number" id="blocks" placeholder="Enter quantity">
+        <input type="number" id="blocks" min="0" value="0">
 
+        <!-- SAND & STONES -->
         <h3>Sand & Stones</h3>
 
-        <label>River Sand - Full Load (R900)</label>
-        <input type="number" id="riverFull" placeholder="Enter quantity">
+        <label>River Sand (Full Loads - R900)</label>
+        <input type="number" id="riverFull" min="0" value="0">
 
-        <label>River Sand - Half Load (R500)</label>
-        <input type="number" id="riverHalf" placeholder="Enter quantity">
+        <label>River Sand (Half Loads - R500)</label>
+        <input type="number" id="riverHalf" min="0" value="0">
 
-        <label>Concrete Sand - Full Load (R900)</label>
-        <input type="number" id="concreteFull" placeholder="Enter quantity">
+        <label>Concrete Sand (Full Loads - R900)</label>
+        <input type="number" id="concreteFull" min="0" value="0">
 
-        <label>Concrete Sand - Half Load (R500)</label>
-        <input type="number" id="concreteHalf" placeholder="Enter quantity">
+        <label>Concrete Sand (Half Loads - R500)</label>
+        <input type="number" id="concreteHalf" min="0" value="0">
 
-        <label>Bou Sand - Full Load (R700)</label>
-        <input type="number" id="bouFull" placeholder="Enter quantity">
+        <label>Bou Sand (Full Loads - R700)</label>
+        <input type="number" id="bouFull" min="0" value="0">
 
-        <label>Bou Sand - Half Load (R500)</label>
-        <input type="number" id="bouHalf" placeholder="Enter quantity">
+        <label>Bou Sand (Half Loads - R500)</label>
+        <input type="number" id="bouHalf" min="0" value="0">
 
-        <label>River Stones - Full Load (R900)</label>
-        <input type="number" id="stonesFull" placeholder="Enter quantity">
+        <label>River Stones (Full Loads - R900)</label>
+        <input type="number" id="stonesFull" min="0" value="0">
 
-        <label>River Stones - Half Load (R500)</label>
-        <input type="number" id="stonesHalf" placeholder="Enter quantity">
+        <label>River Stones (Half Loads - R500)</label>
+        <input type="number" id="stonesHalf" min="0" value="0">
 
-        <button onclick="generatePDF()">Generate Document</button>
+        <button class="exportBtn" onclick="generatePDF()">
+            Generate & Share Document
+        </button>
 
     </div>
 
+    <!-- jsPDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 
