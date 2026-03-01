@@ -8,11 +8,13 @@ function setMode(selectedMode) {
 
 function getNextDocumentNumber() {
     let lastNumber = localStorage.getItem("lastDocNumber");
+
     if (!lastNumber) {
-        lastNumber = 1000;
+        lastNumber = 70; // Start at 70
     } else {
         lastNumber = parseInt(lastNumber) + 1;
     }
+
     localStorage.setItem("lastDocNumber", lastNumber);
     return lastNumber;
 }
@@ -27,7 +29,13 @@ function generatePDF() {
     let deliveryExtra = deliveryType === "distant" ? 100 : 0;
 
     let today = new Date().toLocaleDateString("en-ZA");
-    let docNumber = getNextDocumentNumber();
+    let docNumberRaw = getNextDocumentNumber();
+    let docNumberFormatted = String(docNumberRaw).padStart(3, '0');
+
+    let docNumber = mode === "invoice"
+        ? "RB-INV-" + docNumberFormatted
+        : "RB-QUO-" + docNumberFormatted;
+
     let title = mode === "invoice" ? "INVOICE" : "QUOTATION";
 
     // ===== BRICK UNIT PRICES =====
@@ -66,7 +74,9 @@ function generatePDF() {
 
             // ===== COMPANY INFO =====
             doc.setFontSize(18);
+            doc.setFont(undefined, "bold");
             doc.text("RAMALEPE BRICKYARD", 70, 25);
+            doc.setFont(undefined, "normal");
 
             doc.setFontSize(10);
             doc.text("Quality Brick Suppliers", 70, 32);
@@ -108,6 +118,13 @@ function generatePDF() {
             let grandTotal = 0;
 
             // ===== BRICKS =====
+            const brickNames = {
+                rdp: "RDP Bricks",
+                paving: "Paving Bricks",
+                forehalves: "ForeHalves Bricks",
+                blocks: "Blocks"
+            };
+
             for (let key in brickPrices) {
 
                 let qty = parseInt(document.getElementById(key).value) || 0;
@@ -118,7 +135,7 @@ function generatePDF() {
                     let total = qty * unit;
                     grandTotal += total;
 
-                    doc.text(key.toUpperCase() + " Bricks", 20, y);
+                    doc.text(brickNames[key], 20, y);
                     doc.text(qty.toString(), 110, y);
                     doc.text("R" + unit.toFixed(2), 140, y);
                     doc.text("R" + total.toFixed(2), 170, y);
@@ -128,6 +145,17 @@ function generatePDF() {
             }
 
             // ===== SAND / STONES =====
+            const sandNames = {
+                riverFull: "River Sand – Full Load",
+                riverHalf: "River Sand – Half Load",
+                concreteFull: "Concrete Sand – Full Load",
+                concreteHalf: "Concrete Sand – Half Load",
+                bouFull: "Bou Sand – Full Load",
+                bouHalf: "Bou Sand – Half Load",
+                stonesFull: "River Stones – Full Load",
+                stonesHalf: "River Stones – Half Load"
+            };
+
             for (let key in sandPrices) {
 
                 let qty = parseInt(document.getElementById(key).value) || 0;
@@ -139,7 +167,7 @@ function generatePDF() {
                     let total = qty * finalPrice;
                     grandTotal += total;
 
-                    doc.text(key, 20, y);
+                    doc.text(sandNames[key], 20, y);
                     doc.text(qty.toString(), 110, y);
                     doc.text("R" + finalPrice.toFixed(2), 140, y);
                     doc.text("R" + total.toFixed(2), 170, y);
@@ -151,32 +179,29 @@ function generatePDF() {
             doc.line(100, y, 190, y);
             y += 10;
 
+            // ===== TOTAL (BOLD) =====
+            doc.setFont(undefined, "bold");
             doc.setFontSize(14);
             doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
+            doc.setFont(undefined, "normal");
 
-            // ===== PAYMENT DETAILS =====
-            y += 20;
+            // ===== BANKING DETAILS (ABOVE SIGNATURE) =====
+            let pageHeight = doc.internal.pageSize.height;
+            let bankingY = pageHeight - 70;
 
-            if (mode === "invoice") {
+            doc.setFontSize(11);
+            doc.setFont(undefined, "bold");
+            doc.text("Banking Details", 20, bankingY);
+            doc.setFont(undefined, "normal");
 
-                doc.setFontSize(10);
-                doc.text("Payment Terms: 5 Days from Invoice Date", 20, y);
-                y += 6;
-                doc.text("Bank: Capitec Bank", 20, y);
-                y += 6;
-                doc.text("Account Name: Mr MC Ramalepe", 20, y);
-                y += 6;
-                doc.text("Account No: 1242187837", 20, y);
-                y += 6;
-                doc.text("Phone: 072 550 0640", 20, y);
-            } else {
-                doc.setFontSize(10);
-                doc.text("Quotation Valid For: 5 Days", 20, y);
-            }
+            bankingY += 8;
+            doc.text("Bank: Capitec Bank", 20, bankingY);
+            bankingY += 6;
+            doc.text("Account Name: Mr MC Ramalepe", 20, bankingY);
+            bankingY += 6;
+            doc.text("Account No: 1242187837", 20, bankingY);
 
             // ===== FOOTER SIGNATURE =====
-            let pageHeight = doc.internal.pageSize.height;
-
             doc.line(20, pageHeight - 45, 190, pageHeight - 45);
 
             doc.addImage(signatureImg, "PNG", 20, pageHeight - 40, 40, 25);
@@ -191,11 +216,11 @@ function generatePDF() {
 
             const a = document.createElement("a");
             a.href = pdfUrl;
-            a.download = title + "_" + docNumber + ".pdf";
+            a.download = docNumber + ".pdf";
             a.click();
 
             if (navigator.share) {
-                const file = new File([pdfBlob], title + "_" + docNumber + ".pdf", {
+                const file = new File([pdfBlob], docNumber + ".pdf", {
                     type: "application/pdf",
                 });
 
