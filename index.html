@@ -1,43 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Business Invoice System</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<label>RDP Bricks (R3.50 each)</label>
+<input type="number" id="rdp" min="0" value="0">
 
-    <h1>Business Document Generator</h1>
+<label>Paving Bricks (R1.90 each)</label>
+<input type="number" id="paving" min="0" value="0">
 
-    <div class="buttons">
-        <button onclick="setMode('invoice')">Generate Invoice</button>
-        <button onclick="setMode('quotation')">Generate Quotation</button>
-    </div>
+<label>ForeHalves Bricks (R1.80 each)</label>
+<input type="number" id="forehalves" min="0" value="0">
 
-    <div class="form">
-        <h2 id="documentType">Invoice</h2>
-
-        <label>Client Name:</label>
-        <input type="text" id="clientName" placeholder="Enter client name">
-
-        <h3>Products</h3>
-
-        <div class="product">
-            <label>Product A (R500)</label>
-            <input type="number" id="productA" min="0" value="0">
-        </div>
-
-        <div class="product">
-            <label>Product B (R750)</label>
-            <input type="number" id="productB" min="0" value="0">
-        </div>
-
-        <button class="exportBtn" onclick="generatePDF()">Export as PDF</button>
-    </div>
-
-    <!-- jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
-
-</body>
-</html>
+<label>Blocks (R5.50 each)</label>
+<input type="number" id="blocks" min="0" value="0">
