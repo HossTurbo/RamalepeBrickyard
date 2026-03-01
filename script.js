@@ -3,7 +3,6 @@ function setMode(type) {
         type === "invoice" ? "Invoice" : "Quotation";
 }
 
-// Auto-increment starting at 70
 function getNextNumber(type) {
     let key = type === "invoice" ? "invoiceNumber" : "quotationNumber";
     let current = localStorage.getItem(key);
@@ -29,7 +28,11 @@ function generatePDF() {
     let clientName = document.getElementById("clientName").value || "Walk-in Customer";
     let deliveryType = document.getElementById("deliveryType").value;
 
-    // Get quantities safely
+    // Automatic Date
+    let today = new Date();
+    let formattedDate = today.toLocaleDateString("en-ZA");
+
+    // Quantities
     let rdp = Number(document.getElementById("rdp").value) || 0;
     let paving = Number(document.getElementById("paving").value) || 0;
     let forehalves = Number(document.getElementById("forehalves").value) || 0;
@@ -45,35 +48,44 @@ function generatePDF() {
     let stonesHalf = Number(document.getElementById("stonesHalf").value) || 0;
 
     let total = 0;
-    let y = 40;
+    let y = 65;
 
-    // Header
+    // ===== COMPANY HEADER =====
     doc.setFont(undefined, "bold");
-    doc.text(type.toUpperCase() + " #" + docNumber, 20, 20);
+    doc.setFontSize(16);
+    doc.text("RAMALEPE BRICKYARD", 105, 15, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, "normal");
+    doc.text("1594 Lephepane, Tzaneen, 0850", 105, 22, { align: "center" });
+    doc.text("Phone: 072 550 0640", 105, 28, { align: "center" });
+
+    // ===== DOCUMENT TITLE =====
+    doc.setFont(undefined, "bold");
+    doc.text(type.toUpperCase() + " #" + docNumber, 20, 40);
     doc.setFont(undefined, "normal");
 
-    doc.text("Client: " + clientName, 20, 30);
+    doc.text("Date: " + formattedDate, 150, 40);
+    doc.text("Client: " + clientName, 20, 50);
 
+    // ===== ITEMS =====
     function addItem(name, qty, price) {
         if (qty > 0) {
             let amount = qty * price;
             total += amount;
             doc.text(name + " (" + qty + ")", 20, y);
-            doc.text("R " + amount.toFixed(2), 150, y);
+            doc.text("R " + amount.toFixed(2), 160, y);
             y += 8;
         }
     }
 
-    // Bricks
     addItem("RDP Bricks", rdp, 3.5);
     addItem("Paving Bricks", paving, 1.9);
     addItem("ForeHalves Bricks", forehalves, 1.8);
     addItem("Blocks", blocks, 5.5);
 
-    // Delivery adjustment
     let extra = deliveryType === "distant" ? 100 : 0;
 
-    // Sand & Stones
     addItem("River Sand - Full Load", riverFull, 900 + extra);
     addItem("River Sand - Half Load", riverHalf, 500 + extra);
     addItem("Concrete Sand - Full Load", concreteFull, 900 + extra);
@@ -85,17 +97,16 @@ function generatePDF() {
 
     y += 10;
 
-    // TOTAL (BOLD)
+    // ===== TOTAL =====
     doc.setFont(undefined, "bold");
     doc.text("TOTAL: R " + total.toFixed(2), 20, y);
     doc.setFont(undefined, "normal");
 
-    // Footer line
-    let footerY = 250;
-    doc.line(20, footerY, 190, footerY);
+    // ===== FOOTER SECTION =====
+    let footerLineY = 250;
 
-    // Banking Details near footer
-    let bankingY = footerY - 45;
+    // Banking details above footer
+    let bankingY = footerLineY - 50;
 
     doc.setFont(undefined, "bold");
     doc.text("Banking Details", 20, bankingY);
@@ -109,6 +120,13 @@ function generatePDF() {
     doc.text("Account No: 1242187837", 20, bankingY);
     bankingY += 8;
     doc.text("Phone: 072 550 0640", 20, bankingY);
+
+    // Footer line
+    doc.line(20, footerLineY, 190, footerLineY);
+
+    // ===== LOCKED SIGNATURE =====
+    // Always fixed position relative to footer
+    doc.addImage("signature.png", "PNG", 140, footerLineY + 5, 45, 20);
 
     doc.save(type + "_" + docNumber + ".pdf");
 }
