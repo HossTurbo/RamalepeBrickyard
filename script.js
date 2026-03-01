@@ -14,7 +14,14 @@ function getNextNumber(type) {
     }
 
     localStorage.setItem(key, current);
-    return current;
+
+    let formatted = String(current).padStart(3, '0');
+
+    if (type === "invoice") {
+        return "RB-INV-" + formatted;
+    } else {
+        return "RB-QUO-" + formatted;
+    }
 }
 
 function generatePDF() {
@@ -28,11 +35,9 @@ function generatePDF() {
     let clientName = document.getElementById("clientName").value || "Walk-in Customer";
     let deliveryType = document.getElementById("deliveryType").value;
 
-    // Automatic Date
     let today = new Date();
     let formattedDate = today.toLocaleDateString("en-ZA");
 
-    // Quantities
     let rdp = Number(document.getElementById("rdp").value) || 0;
     let paving = Number(document.getElementById("paving").value) || 0;
     let forehalves = Number(document.getElementById("forehalves").value) || 0;
@@ -48,9 +53,12 @@ function generatePDF() {
     let stonesHalf = Number(document.getElementById("stonesHalf").value) || 0;
 
     let total = 0;
-    let y = 65;
+    let y = 70;
 
-    // ===== COMPANY HEADER =====
+    // Logo
+    doc.addImage("logo.png", "PNG", 20, 10, 30, 30);
+
+    // Company header
     doc.setFont(undefined, "bold");
     doc.setFontSize(16);
     doc.text("RAMALEPE BRICKYARD", 105, 15, { align: "center" });
@@ -60,15 +68,14 @@ function generatePDF() {
     doc.text("1594 Lephepane, Tzaneen, 0850", 105, 22, { align: "center" });
     doc.text("Phone: 072 550 0640", 105, 28, { align: "center" });
 
-    // ===== DOCUMENT TITLE =====
+    // Document number + date
     doc.setFont(undefined, "bold");
-    doc.text(type.toUpperCase() + " #" + docNumber, 20, 40);
+    doc.text(docNumber, 20, 45);
     doc.setFont(undefined, "normal");
 
-    doc.text("Date: " + formattedDate, 150, 40);
-    doc.text("Client: " + clientName, 20, 50);
+    doc.text("Date: " + formattedDate, 150, 45);
+    doc.text("Client: " + clientName, 20, 55);
 
-    // ===== ITEMS =====
     function addItem(name, qty, price) {
         if (qty > 0) {
             let amount = qty * price;
@@ -97,16 +104,14 @@ function generatePDF() {
 
     y += 10;
 
-    // ===== TOTAL =====
     doc.setFont(undefined, "bold");
     doc.text("TOTAL: R " + total.toFixed(2), 20, y);
     doc.setFont(undefined, "normal");
 
-    // ===== FOOTER SECTION =====
-    let footerLineY = 250;
+    let footerY = 250;
 
-    // Banking details above footer
-    let bankingY = footerLineY - 50;
+    // Banking details
+    let bankingY = footerY - 50;
 
     doc.setFont(undefined, "bold");
     doc.text("Banking Details", 20, bankingY);
@@ -122,11 +127,10 @@ function generatePDF() {
     doc.text("Phone: 072 550 0640", 20, bankingY);
 
     // Footer line
-    doc.line(20, footerLineY, 190, footerLineY);
+    doc.line(20, footerY, 190, footerY);
 
-    // ===== LOCKED SIGNATURE =====
-    // Always fixed position relative to footer
-    doc.addImage("signature.png", "PNG", 140, footerLineY + 5, 45, 20);
+    // Locked signature
+    doc.addImage("signature.png", "PNG", 140, footerY + 5, 45, 20);
 
-    doc.save(type + "_" + docNumber + ".pdf");
+    doc.save(docNumber + ".pdf");
 }
