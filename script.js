@@ -6,6 +6,17 @@ function setMode(selectedMode) {
         mode === "invoice" ? "Invoice" : "Quotation";
 }
 
+function getNextDocumentNumber() {
+    let lastNumber = localStorage.getItem("lastDocNumber");
+    if (!lastNumber) {
+        lastNumber = 1000;
+    } else {
+        lastNumber = parseInt(lastNumber) + 1;
+    }
+    localStorage.setItem("lastDocNumber", lastNumber);
+    return lastNumber;
+}
+
 function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -18,99 +29,113 @@ function generatePDF() {
     let priceB = 750;
 
     let today = new Date().toLocaleDateString("en-ZA");
-    let docNumber = Math.floor(100000 + Math.random() * 900000);
+    let docNumber = getNextDocumentNumber();
     let title = mode === "invoice" ? "INVOICE" : "QUOTATION";
 
     let y = 20;
 
-    // ===== LOGO (Brick Sketch Style) =====
-    doc.setFontSize(10);
-    doc.text("████ ████ ████", 20, y);
-    doc.text(" ████ ████ ████", 20, y + 5);
-    doc.text("████ ████ ████", 20, y + 10);
+    // ===== LOGO =====
+    const img = new Image();
+    img.src = "assets/logo.png";
 
-    doc.setFontSize(18);
-    doc.text("RAMALEPE BRICKYARD", 60, y + 8);
+    img.onload = function () {
 
-    doc.setFontSize(11);
-    doc.text("Quality Clay Bricks Supplier", 60, y + 14);
-    doc.text("Phone: 012 345 6789", 60, y + 19);
-    doc.text("Email: info@ramalepebrickyard.co.za", 60, y + 24);
+        doc.addImage(img, "PNG", 20, 15, 40, 30);
 
-    y += 35;
+        // ===== COMPANY INFO =====
+        doc.setFontSize(18);
+        doc.text("RAMALEPE BRICKYARD", 70, 25);
 
-    // ===== Document Info =====
-    doc.setFontSize(16);
-    doc.text(title, 150, 20);
+        doc.setFontSize(10);
+        doc.text("Quality Clay Brick Suppliers", 70, 32);
+        doc.text("123 Industrial Road, Limpopo, South Africa", 70, 37);
+        doc.text("Phone: 012 345 6789", 70, 42);
+        doc.text("Email: info@ramalepebrickyard.co.za", 70, 47);
 
-    doc.setFontSize(11);
-    doc.text("Document No: " + docNumber, 140, 30);
-    doc.text("Date: " + today, 140, 36);
+        // ===== DOCUMENT INFO =====
+        doc.setFontSize(16);
+        doc.text(title, 150, 25);
 
-    // ===== Client Section =====
-    doc.line(20, y, 190, y);
-    y += 10;
+        doc.setFontSize(11);
+        doc.text("No: " + docNumber, 150, 33);
+        doc.text("Date: " + today, 150, 40);
 
-    doc.setFontSize(12);
-    doc.text("Bill To:", 20, y);
-    y += 6;
-    doc.text(client, 20, y);
+        y = 60;
+        doc.line(20, y, 190, y);
+        y += 10;
 
-    y += 10;
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    // ===== Table Header =====
-    doc.text("Item", 20, y);
-    doc.text("Qty", 120, y);
-    doc.text("Unit Price", 140, y);
-    doc.text("Total", 170, y);
-
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    let grandTotal = 0;
-
-    // ===== Product A =====
-    if (qtyA > 0) {
-        let totalA = qtyA * priceA;
-        grandTotal += totalA;
-
-        doc.text("Product A", 20, y);
-        doc.text(qtyA.toString(), 120, y);
-        doc.text("R" + priceA.toFixed(2), 140, y);
-        doc.text("R" + totalA.toFixed(2), 170, y);
+        // ===== CLIENT =====
+        doc.setFontSize(12);
+        doc.text("Bill To:", 20, y);
+        y += 6;
+        doc.text(client, 20, y);
 
         y += 10;
-    }
-
-    // ===== Product B =====
-    if (qtyB > 0) {
-        let totalB = qtyB * priceB;
-        grandTotal += totalB;
-
-        doc.text("Product B", 20, y);
-        doc.text(qtyB.toString(), 120, y);
-        doc.text("R" + priceB.toFixed(2), 140, y);
-        doc.text("R" + totalB.toFixed(2), 170, y);
-
+        doc.line(20, y, 190, y);
         y += 10;
-    }
 
-    // ===== Total Section =====
-    doc.line(100, y, 190, y);
-    y += 10;
+        // ===== TABLE HEADER =====
+        doc.text("Item", 20, y);
+        doc.text("Qty", 120, y);
+        doc.text("Unit", 140, y);
+        doc.text("Total", 170, y);
 
-    doc.setFontSize(14);
-    doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
+        y += 5;
+        doc.line(20, y, 190, y);
+        y += 10;
 
-    y += 20;
+        let grandTotal = 0;
 
-    // ===== Footer =====
-    doc.setFontSize(10);
-    doc.line(20, y, 80, y);
-    doc.text("Authorized Signature", 20, y + 5);
+        if (qtyA > 0) {
+            let totalA = qtyA * priceA;
+            grandTotal += totalA;
 
-    doc.save(title + "_" + docNumber + ".pdf");
+            doc.text("Product A", 20, y);
+            doc.text(qtyA.toString(), 120, y);
+            doc.text("R" + priceA.toFixed(2), 140, y);
+            doc.text("R" + totalA.toFixed(2), 170, y);
+            y += 10;
+        }
+
+        if (qtyB > 0) {
+            let totalB = qtyB * priceB;
+            grandTotal += totalB;
+
+            doc.text("Product B", 20, y);
+            doc.text(qtyB.toString(), 120, y);
+            doc.text("R" + priceB.toFixed(2), 140, y);
+            doc.text("R" + totalB.toFixed(2), 170, y);
+            y += 10;
+        }
+
+        doc.line(100, y, 190, y);
+        y += 10;
+
+        doc.setFontSize(14);
+        doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
+
+        y += 20;
+
+        // ===== PAYMENT / TERMS =====
+        doc.setFontSize(10);
+
+        if (mode === "invoice") {
+            doc.text("Payment Terms: 30 Days from Invoice Date", 20, y);
+            y += 6;
+            doc.text("Bank: Standard Bank", 20, y);
+            y += 6;
+            doc.text("Account Name: Ramalepe Brickyard", 20, y);
+            y += 6;
+            doc.text("Account No: 123456789", 20, y);
+        } else {
+            doc.text("Quotation Valid For: 14 Days", 20, y);
+        }
+
+        y += 20;
+
+        doc.line(20, y, 80, y);
+        doc.text("Authorized Signature", 20, y + 5);
+
+        doc.save(title + "_" + docNumber + ".pdf");
+    };
 }
