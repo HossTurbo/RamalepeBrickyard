@@ -6,10 +6,10 @@ function setMode(selectedMode) {
         mode === "invoice" ? "Invoice" : "Quotation";
 }
 
-/* ================================
-   AUTO NUMBERING (START AT 70)
-   Separate Invoice & Quotation
-================================ */
+/* ==========================================
+   AUTO NUMBERING (START FROM 70)
+   Separate Counters for Invoice & Quotation
+========================================== */
 function getNextDocumentNumber() {
 
     let storageKey =
@@ -41,7 +41,7 @@ function generatePDF() {
 
     let today = new Date().toLocaleDateString("en-ZA");
 
-    // ===== AUTO NUMBER =====
+    // ===== DOCUMENT NUMBER =====
     let numberFormatted = getNextDocumentNumber();
 
     let docNumber =
@@ -51,9 +51,9 @@ function generatePDF() {
 
     let title = mode === "invoice" ? "INVOICE" : "QUOTATION";
 
-    /* ================================
+    /* ==========================================
        PRICES
-    ================================= */
+    ========================================== */
     let brickPrices = {
         rdp: 3.5,
         paving: 1.9,
@@ -83,9 +83,9 @@ function generatePDF() {
 
             let y = 20;
 
-            /* ================================
+            /* ==========================================
                HEADER
-            ================================= */
+            ========================================== */
             doc.addImage(logoImg, "JPEG", 20, 15, 40, 30);
 
             doc.setFontSize(18);
@@ -109,9 +109,9 @@ function generatePDF() {
             doc.line(20, y, 190, y);
             y += 10;
 
-            /* ================================
+            /* ==========================================
                CLIENT
-            ================================= */
+            ========================================== */
             doc.setFontSize(12);
             doc.text("Bill To:", 20, y);
             y += 6;
@@ -121,9 +121,9 @@ function generatePDF() {
             doc.line(20, y, 190, y);
             y += 10;
 
-            /* ================================
+            /* ==========================================
                TABLE HEADER
-            ================================= */
+            ========================================== */
             doc.text("Item", 20, y);
             doc.text("Qty", 110, y);
             doc.text("Unit Price", 140, y);
@@ -135,9 +135,9 @@ function generatePDF() {
 
             let grandTotal = 0;
 
-            /* ================================
+            /* ==========================================
                BRICKS (EXACT NAMES)
-            ================================= */
+            ========================================== */
             const brickNames = {
                 rdp: "RDP Bricks",
                 paving: "Paving Bricks",
@@ -164,9 +164,9 @@ function generatePDF() {
                 }
             }
 
-            /* ================================
+            /* ==========================================
                SAND & STONES (EXACT NAMES)
-            ================================= */
+            ========================================== */
             const sandNames = {
                 riverFull: "River Sand – Full Load",
                 riverHalf: "River Sand – Half Load",
@@ -201,17 +201,17 @@ function generatePDF() {
             doc.line(100, y, 190, y);
             y += 10;
 
-            /* ================================
+            /* ==========================================
                TOTAL (BOLD)
-            ================================= */
+            ========================================== */
             doc.setFont(undefined, "bold");
             doc.setFontSize(14);
             doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
             doc.setFont(undefined, "normal");
 
-            /* ================================
-               BANKING DETAILS (NEAR FOOTER)
-            ================================= */
+            /* ==========================================
+               BANKING DETAILS
+            ========================================== */
             let pageHeight = doc.internal.pageSize.height;
             let bankingY = pageHeight - 75;
 
@@ -229,9 +229,9 @@ function generatePDF() {
             bankingY += 6;
             doc.text("Cell: 072 550 0640", 20, bankingY);
 
-            /* ================================
+            /* ==========================================
                SIGNATURE
-            ================================= */
+            ========================================== */
             doc.line(20, pageHeight - 45, 190, pageHeight - 45);
             doc.addImage(signatureImg, "PNG", 20, pageHeight - 40, 40, 25);
 
@@ -239,16 +239,30 @@ function generatePDF() {
             doc.text("Authorized Digital Signature", 20, pageHeight - 12);
             doc.text("Phone: 072 550 0640", 140, pageHeight - 12);
 
-            /* ================================
-               SAVE PDF
-            ================================= */
+            /* ==========================================
+               SAVE + SHARE
+            ========================================== */
             const pdfBlob = doc.output("blob");
-            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const fileName = docNumber + ".pdf";
 
+            // Auto Download
+            const pdfUrl = URL.createObjectURL(pdfBlob);
             const a = document.createElement("a");
             a.href = pdfUrl;
-            a.download = docNumber + ".pdf";
+            a.download = fileName;
             a.click();
+
+            // Share (Modern Browsers / Mobile)
+            const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    title: title,
+                    text: "Document from Ramalepe Brickyard",
+                    files: [file]
+                }).catch((err) => console.log("Share cancelled or failed"));
+            }
+
         };
     };
 }
