@@ -6,17 +6,24 @@ function setMode(selectedMode) {
         mode === "invoice" ? "Invoice" : "Quotation";
 }
 
+// ===== AUTO INCREMENT (START FROM 70) =====
 function getNextDocumentNumber() {
-    let lastNumber = localStorage.getItem("lastDocNumber");
 
-    if (!lastNumber) {
-        lastNumber = 70; // Start at 70
+    let storageKey = mode === "invoice"
+        ? "invoiceCounter"
+        : "quotationCounter";
+
+    let lastNumber = localStorage.getItem(storageKey);
+
+    if (lastNumber === null) {
+        lastNumber = 70;
     } else {
         lastNumber = parseInt(lastNumber) + 1;
     }
 
-    localStorage.setItem("lastDocNumber", lastNumber);
-    return lastNumber;
+    localStorage.setItem(storageKey, lastNumber);
+
+    return String(lastNumber).padStart(3, "0");
 }
 
 function generatePDF() {
@@ -29,16 +36,17 @@ function generatePDF() {
     let deliveryExtra = deliveryType === "distant" ? 100 : 0;
 
     let today = new Date().toLocaleDateString("en-ZA");
-    let docNumberRaw = getNextDocumentNumber();
-    let docNumberFormatted = String(docNumberRaw).padStart(3, '0');
+
+    // ===== DOCUMENT NUMBER =====
+    let numberFormatted = getNextDocumentNumber();
 
     let docNumber = mode === "invoice"
-        ? "RB-INV-" + docNumberFormatted
-        : "RB-QUO-" + docNumberFormatted;
+        ? "RB-INV-" + numberFormatted
+        : "RB-QUO-" + numberFormatted;
 
     let title = mode === "invoice" ? "INVOICE" : "QUOTATION";
 
-    // ===== BRICK UNIT PRICES =====
+    // ===== PRICES =====
     let brickPrices = {
         rdp: 3.5,
         paving: 1.9,
@@ -46,7 +54,6 @@ function generatePDF() {
         blocks: 5.5
     };
 
-    // ===== SAND PRICES =====
     let sandPrices = {
         riverFull: 900,
         riverHalf: 500,
@@ -72,7 +79,7 @@ function generatePDF() {
             // ===== LOGO =====
             doc.addImage(logoImg, "JPEG", 20, 15, 40, 30);
 
-            // ===== COMPANY INFO =====
+            // ===== COMPANY NAME (BOLD) =====
             doc.setFontSize(18);
             doc.setFont(undefined, "bold");
             doc.text("RAMALEPE BRICKYARD", 70, 25);
@@ -117,7 +124,6 @@ function generatePDF() {
 
             let grandTotal = 0;
 
-            // ===== BRICKS =====
             const brickNames = {
                 rdp: "RDP Bricks",
                 paving: "Paving Bricks",
@@ -144,7 +150,6 @@ function generatePDF() {
                 }
             }
 
-            // ===== SAND / STONES =====
             const sandNames = {
                 riverFull: "River Sand – Full Load",
                 riverHalf: "River Sand – Half Load",
@@ -185,9 +190,9 @@ function generatePDF() {
             doc.text("TOTAL: R" + grandTotal.toFixed(2), 130, y);
             doc.setFont(undefined, "normal");
 
-            // ===== BANKING DETAILS (ABOVE SIGNATURE) =====
+            // ===== BANKING DETAILS =====
             let pageHeight = doc.internal.pageSize.height;
-            let bankingY = pageHeight - 70;
+            let bankingY = pageHeight - 75;
 
             doc.setFontSize(11);
             doc.setFont(undefined, "bold");
@@ -200,17 +205,18 @@ function generatePDF() {
             doc.text("Account Name: Mr MC Ramalepe", 20, bankingY);
             bankingY += 6;
             doc.text("Account No: 1242187837", 20, bankingY);
+            bankingY += 6;
+            doc.text("Cell: 072 550 0640", 20, bankingY); // ADDED CELL NUMBER
 
-            // ===== FOOTER SIGNATURE =====
+            // ===== SIGNATURE =====
             doc.line(20, pageHeight - 45, 190, pageHeight - 45);
-
             doc.addImage(signatureImg, "PNG", 20, pageHeight - 40, 40, 25);
 
             doc.setFontSize(9);
             doc.text("Authorized Digital Signature", 20, pageHeight - 12);
             doc.text("Phone: 072 550 0640", 140, pageHeight - 12);
 
-            // ===== SAVE & SHARE =====
+            // ===== SAVE =====
             const pdfBlob = doc.output("blob");
             const pdfUrl = URL.createObjectURL(pdfBlob);
 
@@ -218,18 +224,6 @@ function generatePDF() {
             a.href = pdfUrl;
             a.download = docNumber + ".pdf";
             a.click();
-
-            if (navigator.share) {
-                const file = new File([pdfBlob], docNumber + ".pdf", {
-                    type: "application/pdf",
-                });
-
-                navigator.share({
-                    title: title,
-                    text: "Document from Ramalepe Brickyard",
-                    files: [file]
-                });
-            }
         };
     };
 }
