@@ -1,162 +1,118 @@
-let documentMode = "invoice";
-
-// Invoice counter starting at 70
-let invoiceCounter = localStorage.getItem("invoiceCounter");
-if (!invoiceCounter) {
-    invoiceCounter = 70;
-} else {
-    invoiceCounter = parseInt(invoiceCounter);
-}
-
-function setMode(mode) {
-    documentMode = mode;
+function setMode(type) {
     document.getElementById("documentType").innerText =
-        mode === "invoice" ? "Invoice" : "Quotation";
+        type === "invoice" ? "Invoice" : "Quotation";
 }
 
-async function generatePDF() {
+function getNextNumber(type) {
+    let key = type === "invoice" ? "invoiceNumber" : "quotationNumber";
+    let current = localStorage.getItem(key);
+
+    if (!current) {
+        current = 70;
+    } else {
+        current = parseInt(current) + 1;
+    }
+
+    localStorage.setItem(key, current);
+    return current;
+}
+
+function generatePDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const today = new Date().toLocaleDateString();
+    let type = document.getElementById("documentType").innerText.toLowerCase();
+    let docNumber = getNextNumber(type);
 
-    // Generate document number
-    const docNumber = documentMode === "invoice"
-        ? "RB-INV-" + String(invoiceCounter).padStart(3, "0")
-        : "RB-QUO-" + String(invoiceCounter).padStart(3, "0");
+    let clientName = document.getElementById("clientName").value || "Walk-in Customer";
+    let deliveryType = document.getElementById("deliveryType").value;
 
-    invoiceCounter++;
-    localStorage.setItem("invoiceCounter", invoiceCounter);
+    let rdp = Number(document.getElementById("rdp").value) || 0;
+    let paving = Number(document.getElementById("paving").value) || 0;
+    let forehalves = Number(document.getElementById("forehalves").value) || 0;
+    let blocks = Number(document.getElementById("blocks").value) || 0;
 
-    // ===== LOAD IMAGES PROPERLY =====
-    const logoBase64 = await imageToBase64("logo.jpg");
-    const signatureBase64 = await imageToBase64("signature.png");
+    let riverFull = Number(document.getElementById("riverFull").value) || 0;
+    let riverHalf = Number(document.getElementById("riverHalf").value) || 0;
+    let concreteFull = Number(document.getElementById("concreteFull").value) || 0;
+    let concreteHalf = Number(document.getElementById("concreteHalf").value) || 0;
+    let bouFull = Number(document.getElementById("bouFull").value) || 0;
+    let bouHalf = Number(document.getElementById("bouHalf").value) || 0;
+    let stonesFull = Number(document.getElementById("stonesFull").value) || 0;
+    let stonesHalf = Number(document.getElementById("stonesHalf").value) || 0;
 
-    // ===== HEADER =====
-    if (logoBase64) {
-        doc.addImage(logoBase64, "JPEG", 80, 5, 50, 25);
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("RAMALEPE BRICKYARD", 105, 40, { align: "center" });
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-
-    doc.text("1594 Lephepane, Tzaneen, 0850", 105, 47, { align: "center" });
-    doc.text("Phone: 072 550 0640", 105, 53, { align: "center" });
-
-    doc.text(`${documentMode === "invoice" ? "Invoice" : "Quotation"} No: ${docNumber}`, 14, 65);
-    doc.text(`Date: ${today}`, 14, 72);
-
-    const clientName = document.getElementById("clientName").value || "N/A";
-    doc.text(`Client: ${clientName}`, 14, 82);
-
-    // ===== ITEMS =====
-    let y = 95;
     let total = 0;
+    let y = 55;
 
-    doc.setFont("helvetica", "bold");
-    doc.text("Item", 14, y);
-    doc.text("Qty", 120, y);
-    doc.text("Amount", 160, y);
-    doc.setFont("helvetica", "normal");
+    // COMPANY HEADER (BOLD)
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(16);
+    doc.text("RAMALEPE BRICKYARD", 105, 15, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont(undefined, "normal");
 
-    y += 8;
+    doc.text("1594 Lephepane, Tzaneen, 0850", 105, 22, { align: "center" });
+    doc.text("Phone: 072 550 0640", 105, 28, { align: "center" });
+
+    doc.setFont(undefined, "bold");
+    doc.text(type.toUpperCase() + " #" + docNumber, 20, 40);
+    doc.setFont(undefined, "normal");
+
+    doc.text("Client: " + clientName, 20, 48);
 
     function addItem(name, qty, price) {
         if (qty > 0) {
-            const amount = qty * price;
+            let amount = qty * price;
             total += amount;
-
-            doc.text(name, 14, y);
-            doc.text(String(qty), 120, y);
-            doc.text("R" + amount.toFixed(2), 160, y);
+            doc.text(name + " (" + qty + ")", 20, y);
+            doc.text("R " + amount.toFixed(2), 160, y);
             y += 8;
         }
     }
 
-    const deliveryType = document.getElementById("deliveryType").value;
-    const extra = deliveryType === "distant" ? 100 : 0;
+    addItem("RDP Bricks", rdp, 3.5);
+    addItem("Paving Bricks", paving, 1.9);
+    addItem("ForeHalves Bricks", forehalves, 1.8);
+    addItem("Blocks", blocks, 5.5);
 
-    // Bricks
-    addItem("RDP Bricks", getValue("rdp"), 3.50);
-    addItem("Paving Bricks", getValue("paving"), 1.90);
-    addItem("ForeHalves Bricks", getValue("forehalves"), 1.80);
-    addItem("Blocks", getValue("blocks"), 5.50);
+    let extra = deliveryType === "distant" ? 100 : 0;
 
-    // Sand & Stones
-    addItem("River Sand - Full Load", getValue("riverFull"), 900 + extra);
-    addItem("River Sand - Half Load", getValue("riverHalf"), 500 + extra);
-    addItem("Concrete Sand - Full Load", getValue("concreteFull"), 900 + extra);
-    addItem("Concrete Sand - Half Load", getValue("concreteHalf"), 500 + extra);
-    addItem("Bou Sand - Full Load", getValue("bouFull"), 700 + extra);
-    addItem("Bou Sand - Half Load", getValue("bouHalf"), 500 + extra);
-    addItem("River Stones - Full Load", getValue("stonesFull"), 900 + extra);
-    addItem("River Stones - Half Load", getValue("stonesHalf"), 500 + extra);
+    addItem("River Sand - Full Load", riverFull, 900 + extra);
+    addItem("River Sand - Half Load", riverHalf, 500 + extra);
+    addItem("Concrete Sand - Full Load", concreteFull, 900 + extra);
+    addItem("Concrete Sand - Half Load", concreteHalf, 500 + extra);
+    addItem("Bou Sand - Full Load", bouFull, 700 + extra);
+    addItem("Bou Sand - Half Load", bouHalf, 500 + extra);
+    addItem("River Stones - Full Load", stonesFull, 900 + extra);
+    addItem("River Stones - Half Load", stonesHalf, 500 + extra);
 
-    // ===== TOTAL =====
     y += 10;
-    doc.setFont("helvetica", "bold");
-    doc.text("TOTAL: R" + total.toFixed(2), 14, y);
 
-    // ===== BANKING DETAILS =====
-    let footerY = 235;
+    doc.setFont(undefined, "bold");
+    doc.text("TOTAL: R " + total.toFixed(2), 20, y);
+    doc.setFont(undefined, "normal");
 
-    doc.setFont("helvetica", "bold");
-    doc.text("Banking Details", 14, footerY);
-    doc.setFont("helvetica", "normal");
+    let footerLineY = 250;
+    let bankingY = footerLineY - 45;
 
-    footerY += 8;
-    doc.text("Bank: Capitec Bank", 14, footerY);
-    footerY += 7;
-    doc.text("Account Name: Mr MC Ramalepe", 14, footerY);
-    footerY += 7;
-    doc.text("Account No: 1242187837", 14, footerY);
+    doc.setFont(undefined, "bold");
+    doc.text("Banking Details", 20, bankingY);
+    doc.setFont(undefined, "normal");
 
-    // ===== SIGNATURE LOCKED =====
-    if (signatureBase64) {
-        doc.addImage(signatureBase64, "PNG", 140, 250, 50, 20);
-    }
+    bankingY += 8;
+    doc.text("Bank: Capitec Bank", 20, bankingY);
+    bankingY += 8;
+    doc.text("Account Name: Mr MC Ramalepe", 20, bankingY);
+    bankingY += 8;
+    doc.text("Account No: 1242187837", 20, bankingY);
+    bankingY += 8;
+    doc.text("Phone: 072 550 0640", 20, bankingY);
 
-    // ===== SAVE + SHARE =====
-    const pdfBlob = doc.output("blob");
-    const file = new File([pdfBlob], `${docNumber}.pdf`, { type: "application/pdf" });
+    doc.line(20, footerLineY, 190, footerLineY);
 
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: docNumber,
-                files: [file]
-            });
-        } catch (err) {
-            doc.save(`${docNumber}.pdf`);
-        }
-    } else {
-        doc.save(`${docNumber}.pdf`);
-    }
-}
+    // Signature image (make sure file exists in project folder)
+    doc.addImage("signature.png", "PNG", 140, footerLineY + 5, 40, 20);
 
-// Helper functions
-function getValue(id) {
-    const value = document.getElementById(id).value;
-    return value === "" ? 0 : parseInt(value);
-}
-
-function imageToBase64(path) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.src = path;
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            resolve(canvas.toDataURL());
-        };
-        img.onerror = () => resolve(null);
-    });
+    doc.save(type + "_" + docNumber + ".pdf");
 }
