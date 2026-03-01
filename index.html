@@ -1,65 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramalepe Brickyard · Invoice & Quotation</title>
-    <!-- jsPDF library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- external stylesheet -->
+    <title>Ramalepe Brickyard System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h1>⛰️ RAMALEPE BRICKYARD</h1>
-        <!-- mode toggles (invoice / quotation) -->
-        <div class="mode-bar">
-            <button class="mode-btn" id="modeInvoice" onclick="setMode('invoice')">📄 INVOICE</button>
-            <button class="mode-btn" id="modeQuotation" onclick="setMode('quotation')">📋 QUOTATION</button>
-        </div>
-        <!-- dynamic document type display -->
-        <div class="doc-badge" id="documentType">Invoice</div>
 
-        <form id="orderForm" onsubmit="event.preventDefault(); generatePDF();">
-            <div class="form-grid">
-                <!-- client & delivery -->
-                <div class="field-group">
-                    <label>👤 Client name</label>
-                    <input type="text" id="clientName" placeholder="Walk-in Customer" autocomplete="off">
-                </div>
-                <div class="field-group">
-                    <label>🚚 Delivery zone</label>
-                    <select id="deliveryType">
-                        <option value="local" selected>Local (no extra)</option>
-                        <option value="distant">Distant (+ R100 per load)</option>
-                    </select>
-                </div>
+    <h1>RAMALEPE BRICKYARD</h1>
+    <p style="text-align:center;">Invoice & Quotation Generator</p>
 
-                <!-- BRICKS SECTION -->
-                <div class="section-title full-width">🧱 BRICKS</div>
-                <div class="field-group"><label>RDP Bricks (R3.50 ea)</label><input type="number" id="rdp" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Paving Bricks (R1.90 ea)</label><input type="number" id="paving" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>ForeHalves Bricks (R1.80 ea)</label><input type="number" id="forehalves" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Blocks (R5.50 ea)</label><input type="number" id="blocks" min="0" step="1" placeholder="0"></div>
-
-                <!-- SAND & STONES -->
-                <div class="section-title full-width">🪨 SAND & STONES</div>
-                <div class="field-group"><label>River Sand – Full Load (R900)</label><input type="number" id="riverFull" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>River Sand – Half Load (R500)</label><input type="number" id="riverHalf" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Concrete Sand – Full Load (R900)</label><input type="number" id="concreteFull" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Concrete Sand – Half Load (R500)</label><input type="number" id="concreteHalf" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Bou Sand – Full Load (R700)</label><input type="number" id="bouFull" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>Bou Sand – Half Load (R500)</label><input type="number" id="bouHalf" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>River Stones – Full Load (R900)</label><input type="number" id="stonesFull" min="0" step="1" placeholder="0"></div>
-                <div class="field-group"><label>River Stones – Half Load (R500)</label><input type="number" id="stonesHalf" min="0" step="1" placeholder="0"></div>
-
-                <!-- action button -->
-                <button type="submit" class="generate-btn">📄 GENERATE PDF</button>
-                <div class="note">Banking details & signature appear only in PDF. Numbers auto‑increment (start at 70).</div>
-            </div>
-        </form>
+    <div class="buttons">
+        <button onclick="setMode('invoice')">Generate Invoice</button>
+        <button onclick="setMode('quotation')">Generate Quotation</button>
     </div>
-    <!-- external script -->
+
+    <div class="form">
+
+        <h2 id="documentType">Invoice</h2>
+
+        <!-- CLIENT -->
+        <label>Client Name</label>
+        <input type="text" id="clientName" placeholder="Enter client name">
+
+        <!-- DELIVERY -->
+        <label>Delivery Type</label>
+        <select id="deliveryType">
+            <option value="local">Local Delivery</option>
+            <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
+        </select>
+
+        <!-- BRICKS -->
+        <h3>Bricks</h3>
+
+        <label>RDP Bricks (R3.50 each)</label>
+        <input type="number" id="rdp" min="0" value="0">
+
+        <label>Paving Bricks (R1.90 each)</label>
+        <input type="number" id="paving" min="0" value="0">
+
+        <label>ForeHalves Bricks (R1.80 each)</label>
+        <input type="number" id="forehalves" min="0" value="0">
+
+        <label>Blocks (R5.50 each)</label>
+        <input type="number" id="blocks" min="0" value="0">
+
+        <!-- SAND & STONES -->
+        <h3>Sand & Stones</h3>
+
+        <label>River Sand (Full Loads - R900)</label>
+        <input type="number" id="riverFull" min="0" value="0">
+
+        <label>River Sand (Half Loads - R500)</label>
+        <input type="number" id="riverHalf" min="0" value="0">
+
+        <label>Concrete Sand (Full Loads - R900)</label>
+        <input type="number" id="concreteFull" min="0" value="0">
+
+        <label>Concrete Sand (Half Loads - R500)</label>
+        <input type="number" id="concreteHalf" min="0" value="0">
+
+        <label>Bou Sand (Full Loads - R700)</label>
+        <input type="number" id="bouFull" min="0" value="0">
+
+        <label>Bou Sand (Half Loads - R500)</label>
+        <input type="number" id="bouHalf" min="0" value="0">
+
+        <label>River Stones (Full Loads - R900)</label>
+        <input type="number" id="stonesFull" min="0" value="0">
+
+        <label>River Stones (Half Loads - R500)</label>
+        <input type="number" id="stonesHalf" min="0" value="0">
+
+        <button class="exportBtn" onclick="generatePDF()">
+            Generate & Share Document
+        </button>
+
+    </div>
+
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
