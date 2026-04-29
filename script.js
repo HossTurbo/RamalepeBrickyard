@@ -55,10 +55,10 @@ function generatePDF() {
        PRICES
     ========================================== */
     let brickPrices = {
-        rdp: 3.5,
-        paving: 1.9,
-        forehalves: 1.8,
-        blocks: 5.5
+        rdp: 3.75,
+        paving: 2,
+        forehalves: 1.9,
+        blocks: 6
     };
 
     let sandPrices = {
