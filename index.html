@@ -2,266 +2,716 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ramalepe Brickyard System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- jsPDF -->
+    <title>Ramalepe Brickyard | Pro Invoicing & Quotations</title>
+    <!-- jsPDF + autoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background: #f2f4f5;
+            background: #eef2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px 20px;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .card {
+        /* main card */
+        .doc-card {
+            max-width: 1300px;
             width: 100%;
-            max-width: 1100px;
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-            padding: 2rem 2rem 2.5rem;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 1.8rem 2rem 2.2rem;
+            transition: all 0.2s;
         }
 
+        /* typography - professional & readable */
         h1 {
-            font-size: 2rem;
+            font-size: 1.9rem;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            color: #1e2f4d;
-            text-align: center;
-            margin-bottom: 0.25rem;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #5c6f87;
-            margin-bottom: 20px;
-        }
-
-        /* MODE BUTTONS */
-        .buttons {
+            color: #1a2c3e;
+            letter-spacing: -0.3px;
             display: flex;
-            gap: 1rem;
+            align-items: center;
             justify-content: center;
-            margin: 1.5rem 0 1rem;
+            gap: 12px;
+            margin-bottom: 0.2rem;
         }
 
-        .buttons button {
-            background: none;
-            border: 2px solid #d0d9e4;
-            padding: 0.6rem 2rem;
-            border-radius: 40px;
-            font-size: 1.1rem;
+        .subhead {
+            text-align: center;
+            color: #556b82;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 6px;
+        }
+
+        /* mode buttons */
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin: 1rem 0 0.8rem;
+        }
+        .mode-btn {
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            padding: 0.5rem 2rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
             font-weight: 600;
-            color: #2c3e5c;
+            color: #2c3e50;
             cursor: pointer;
             transition: 0.2s;
         }
-
-        .buttons button:hover {
-            background: #1e2f4d;
+        .mode-btn.active {
+            background: #1e3a5f;
+            border-color: #1e3a5f;
             color: white;
-            border-color: #1e2f4d;
+        }
+        .mode-btn:hover:not(.active) {
+            background: #f1f5f9;
+            border-color: #94a3b8;
         }
 
-        #documentType {
-            text-align: center;
+        /* doc type badge + paid toggle row */
+        .doc-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 1.2rem 0 1.5rem 0;
+            background: #f8fafc;
+            padding: 0.7rem 1.2rem;
+            border-radius: 60px;
+        }
+        #documentTypeBadge {
+            font-size: 1.35rem;
             font-weight: 700;
-            font-size: 1.2rem;
-            background: #eef2f6;
-            padding: 8px 20px;
+            background: #e9edf2;
+            padding: 0.2rem 1.2rem;
             border-radius: 40px;
+            color: #1e3a5f;
+        }
+        .paid-toggle-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 5px 16px;
+            border-radius: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .toggle-switch {
+            position: relative;
             display: inline-block;
-            margin: 10px auto 25px auto;
+            width: 48px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2b6e3c;
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .paid-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c3e50;
         }
 
+        /* form grid */
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem 1.5rem;
         }
-
-        label {
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-group label {
             font-weight: 600;
-            color: #1f3a5f;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            color: #2c3e5c;
+            letter-spacing: 0.3px;
         }
-
         input, select {
-            padding: 10px 14px;
-            border: 1.5px solid #cfddee;
-            border-radius: 16px;
-            font-size: 1rem;
-            width: 100%;
-            margin-top: 6px;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #2b4f8e;
-            box-shadow: 0 0 0 3px rgba(30,47,77,0.1);
-        }
-
-        input::placeholder {
-            color: #9aa9bd;
-        }
-
-        .section-title {
-            grid-column: span 2;
-            font-weight: 700;
-            color: #1e2f4d;
-            margin-top: 10px;
-            border-bottom: 2px solid #dde3ec;
-            padding-bottom: 4px;
-        }
-
-        .exportBtn {
-            grid-column: span 2;
-            background: #1e2f4d;
-            color: white;
-            border: none;
-            padding: 16px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            border-radius: 60px;
-            margin-top: 25px;
-            cursor: pointer;
+            padding: 9px 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            background: white;
             transition: 0.2s;
         }
-
-        .exportBtn:hover {
-            background: #2b405f;
+        input:focus, select:focus {
+            border-color: #1e3a5f;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+        }
+        .section-title {
+            grid-column: 1 / -1;
+            font-weight: 700;
+            font-size: 1rem;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 40px;
+            margin: 8px 0 4px 0;
+            color: #0f2b3f;
         }
 
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .section-title,
-            .exportBtn {
-                grid-column: span 1;
-            }
+        /* manual items table */
+        .manual-section {
+            margin: 20px 0 12px;
+            border: 1px solid #e9edf2;
+            border-radius: 20px;
+            padding: 1rem;
+            background: #ffffff;
+        }
+        .manual-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .manual-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        .btn-icon {
+            background: #1e3a5f;
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .manual-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .manual-table th, .manual-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 5px;
+            text-align: left;
+        }
+        .manual-table th {
+            color: #3b5c7c;
+            font-weight: 600;
+        }
+        .manual-table input {
+            width: 100%;
+            padding: 6px 6px;
+            font-size: 0.75rem;
+        }
+        .remove-row {
+            background: none;
+            border: none;
+            color: #b91c1c;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .total-summary {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin: 20px 0 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .grand-total {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .export-btn {
+            background: #1e3a5f;
+            width: 100%;
+            padding: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .export-btn:hover {
+            background: #143250;
+        }
+
+        @media (max-width: 750px) {
+            .doc-card { padding: 1.2rem; }
+            .doc-header-row { flex-direction: column; gap: 10px; align-items: stretch; }
+            .paid-toggle-area { justify-content: space-between; }
         }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div class="doc-card">
+    <h1>🏭 RAMALEPE BRICKYARD</h1>
+    <div style="text-align: center;"><span class="subhead">premium clay & building materials</span></div>
 
-    <h1>⛰️ RAMALEPE BRICKYARD</h1>
-    <div class="subtitle">Invoice & Quotation Generator</div>
-
-    <div class="buttons">
-        <button onclick="setMode('invoice')">📄 Invoice</button>
-        <button onclick="setMode('quotation')">📋 Quotation</button>
+    <div class="mode-buttons">
+        <button class="mode-btn active" id="btnInvoice" onclick="setDocumentMode('invoice')">📄 INVOICE</button>
+        <button class="mode-btn" id="btnQuotation" onclick="setDocumentMode('quotation')">📋 QUOTATION</button>
     </div>
 
-    <div style="text-align:center;">
-        <h2 id="documentType">Invoice</h2>
+    <div class="doc-header-row">
+        <span id="documentTypeBadge">INVOICE</span>
+        <div id="paidToggleContainer" class="paid-toggle-area">
+            <span class="paid-label">✅ PAID STAMP</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="paidStampCheckbox">
+                <span class="slider"></span>
+            </label>
+            <span style="font-size:0.7rem; color:#4b5563;">(visible on PDF)</span>
+        </div>
     </div>
 
     <div class="form-grid">
-
-        <!-- CLIENT -->
-        <div>
-            <label>Client Name</label>
-            <input type="text" id="clientName" placeholder="Enter client name">
+        <!-- Client -->
+        <div class="input-group">
+            <label>👤 Client / Company</label>
+            <input type="text" id="clientName" placeholder="Full name or business" value="Sunset Construction">
         </div>
-
-        <!-- DELIVERY -->
-        <div>
-            <label>Delivery Type</label>
+        <div class="input-group">
+            <label>🚚 Delivery Type</label>
             <select id="deliveryType">
-                <option value="local">Local Delivery</option>
-                <option value="distant">Distant Delivery (+R100 on Sand/Stone)</option>
+                <option value="local">Local Delivery (included)</option>
+                <option value="distant">Distant Delivery (+R100 Sand/Stone)</option>
             </select>
         </div>
 
-        <!-- BRICKS -->
-        <div class="section-title">🧱 Bricks</div>
+        <div class="section-title">🧱 BRICKS & BLOCKS</div>
+        <div class="input-group"><label>RDP Bricks (R3.75 ea)</label><input type="number" id="rdp" min="0" value="0" step="1"></div>
+        <div class="input-group"><label>Paving Bricks (R2.00 ea)</label><input type="number" id="paving" min="0" value="0" step="1"></div>
+        <div class="input-group"><label>ForeHalves (R1.90 ea)</label><input type="number" id="forehalves" min="0" value="0" step="1"></div>
+        <div class="input-group"><label>Blocks  (R6.00 ea)</label><input type="number" id="blocks" min="0" value="0" step="1"></div>
 
-        <div>
-            <label>RDP Bricks (R3.75 each)</label>
-            <input type="number" id="rdp" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Paving Bricks (R2 each)</label>
-            <input type="number" id="paving" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>ForeHalves Bricks (R1.90 each)</label>
-            <input type="number" id="forehalves" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Blocks (R6 each)</label>
-            <input type="number" id="blocks" min="0" placeholder="0">
-        </div>
-
-        <!-- SAND & STONES -->
-        <div class="section-title">🪨 Sand & Stones</div>
-
-        <div>
-            <label>River Sand (Full Loads - R900)</label>
-            <input type="number" id="riverFull" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>River Sand (Half Loads - R500)</label>
-            <input type="number" id="riverHalf" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Concrete Sand (Full Loads - R900)</label>
-            <input type="number" id="concreteFull" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Concrete Sand (Half Loads - R500)</label>
-            <input type="number" id="concreteHalf" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Bou Sand (Full Loads - R700)</label>
-            <input type="number" id="bouFull" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>Bou Sand (Half Loads - R500)</label>
-            <input type="number" id="bouHalf" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>River Stones (Full Loads - R900)</label>
-            <input type="number" id="stonesFull" min="0" placeholder="0">
-        </div>
-
-        <div>
-            <label>River Stones (Half Loads - R500)</label>
-            <input type="number" id="stonesHalf" min="0" placeholder="0">
-        </div>
-
-        <button class="exportBtn" onclick="generatePDF()">
-            📄 Generate & Share Document
-        </button>
-
+        <div class="section-title">🪨 SAND & STONES (loads)</div>
+        <div class="input-group"><label>River Sand Full (R900)</label><input type="number" id="riverFull" min="0" value="0"></div>
+        <div class="input-group"><label>River Sand Half (R500)</label><input type="number" id="riverHalf" min="0" value="0"></div>
+        <div class="input-group"><label>Concrete Sand Full (R900)</label><input type="number" id="concreteFull" min="0" value="0"></div>
+        <div class="input-group"><label>Concrete Sand Half (R500)</label><input type="number" id="concreteHalf" min="0" value="0"></div>
+        <div class="input-group"><label>Bou Sand Full (R700)</label><input type="number" id="bouFull" min="0" value="0"></div>
+        <div class="input-group"><label>Bou Sand Half (R500)</label><input type="number" id="bouHalf" min="0" value="0"></div>
+        <div class="input-group"><label>River Stones Full (R900)</label><input type="number" id="stonesFull" min="0" value="0"></div>
+        <div class="input-group"><label>River Stones Half (R500)</label><input type="number" id="stonesHalf" min="0" value="0"></div>
     </div>
 
+    <!-- MANUAL ITEMS SECTION -->
+    <div class="manual-section">
+        <div class="manual-header">
+            <h3>✏️ Additional line items (custom materials / labour)</h3>
+            <button class="btn-icon" id="addManualRowBtn">+ Add item</button>
+        </div>
+        <table class="manual-table" id="manualItemsTable">
+            <thead>
+                <tr><th>Description</th><th>Qty</th><th>Unit Price (ZAR)</th><th>Total</th><th style="width:30px"></th></tr>
+            </thead>
+            <tbody id="manualTableBody">
+                <!-- example row will be added via js but we start with 1 empty row -->
+            </tbody>
+        </table>
+        <div style="font-size:0.7rem; margin-top:8px; color:#5b6e8c;">* Add any extra fees, transport or custom products</div>
+    </div>
+
+    <div class="total-summary">
+        <span>💰 Subtotal (excl. delivery surcharge)</span>
+        <span id="subtotalPreview">R0.00</span>
+        <span>🚛 Delivery surcharge (if distant & sand/stone >0)</span>
+        <span id="surchargePreview">R0.00</span>
+        <span class="grand-total">📌 TOTAL (VAT inclusive)</span>
+        <span class="grand-total" id="grandTotalPreview">R0.00</span>
+    </div>
+
+    <button class="export-btn" onclick="generateFinalPDF()">📑 GENERATE PROFESSIONAL PDF</button>
 </div>
 
-<script src="script.js"></script>
+<script>
+    // ---------- DOM elements ----------
+    let currentMode = "invoice";   // 'invoice' or 'quotation'
+    const docTypeSpan = document.getElementById("documentTypeBadge");
+    const paidToggleContainer = document.getElementById("paidToggleContainer");
+    const paidCheckbox = document.getElementById("paidStampCheckbox");
 
+    // Input references
+    const clientNameInput = document.getElementById("clientName");
+    const deliverySelect = document.getElementById("deliveryType");
+    // bricks
+    const rdp = document.getElementById("rdp");
+    const paving = document.getElementById("paving");
+    const forehalves = document.getElementById("forehalves");
+    const blocks = document.getElementById("blocks");
+    // sand & stones
+    const riverFull = document.getElementById("riverFull");
+    const riverHalf = document.getElementById("riverHalf");
+    const concreteFull = document.getElementById("concreteFull");
+    const concreteHalf = document.getElementById("concreteHalf");
+    const bouFull = document.getElementById("bouFull");
+    const bouHalf = document.getElementById("bouHalf");
+    const stonesFull = document.getElementById("stonesFull");
+    const stonesHalf = document.getElementById("stonesHalf");
+
+    // manual items table
+    const manualBody = document.getElementById("manualTableBody");
+    let manualRows = []; // store DOM row references
+
+    // Helper: prices
+    const PRICES = {
+        rdp: 3.75, paving: 2.0, forehalves: 1.9, blocks: 6.0,
+        riverFull: 900, riverHalf: 500, concreteFull: 900, concreteHalf: 500,
+        bouFull: 700, bouHalf: 500, stonesFull: 900, stonesHalf: 500
+    };
+
+    function formatRand(amount) {
+        return "R" + amount.toFixed(2);
+    }
+
+    // Compute main items subtotal (bricks + sand/stone)
+    function computeMaterialsSubtotal() {
+        let total = 0;
+        total += (parseFloat(rdp.value) || 0) * PRICES.rdp;
+        total += (parseFloat(paving.value) || 0) * PRICES.paving;
+        total += (parseFloat(forehalves.value) || 0) * PRICES.forehalves;
+        total += (parseFloat(blocks.value) || 0) * PRICES.blocks;
+        total += (parseFloat(riverFull.value) || 0) * PRICES.riverFull;
+        total += (parseFloat(riverHalf.value) || 0) * PRICES.riverHalf;
+        total += (parseFloat(concreteFull.value) || 0) * PRICES.concreteFull;
+        total += (parseFloat(concreteHalf.value) || 0) * PRICES.concreteHalf;
+        total += (parseFloat(bouFull.value) || 0) * PRICES.bouFull;
+        total += (parseFloat(bouHalf.value) || 0) * PRICES.bouHalf;
+        total += (parseFloat(stonesFull.value) || 0) * PRICES.stonesFull;
+        total += (parseFloat(stonesHalf.value) || 0) * PRICES.stonesHalf;
+        return total;
+    }
+
+    // check if any sand/stone load > 0
+    function hasSandOrStone() {
+        const sandStoneFields = [riverFull, riverHalf, concreteFull, concreteHalf, bouFull, bouHalf, stonesFull, stonesHalf];
+        return sandStoneFields.some(field => (parseFloat(field.value) || 0) > 0);
+    }
+
+    function getDeliverySurcharge() {
+        if (deliverySelect.value === "distant" && hasSandOrStone()) {
+            return 100;
+        }
+        return 0;
+    }
+
+    // compute manual items total
+    function getManualItemsTotal() {
+        let total = 0;
+        const rows = manualBody.querySelectorAll("tr");
+        rows.forEach(row => {
+            const qtyInput = row.querySelector(".manual-qty");
+            const priceInput = row.querySelector(".manual-price");
+            if (qtyInput && priceInput) {
+                let qty = parseFloat(qtyInput.value) || 0;
+                let price = parseFloat(priceInput.value) || 0;
+                total += qty * price;
+            }
+        });
+        return total;
+    }
+
+    function updateAllPreviews() {
+        const subtotalMaterials = computeMaterialsSubtotal();
+        const manualTotal = getManualItemsTotal();
+        const subtotal = subtotalMaterials + manualTotal;
+        const surcharge = getDeliverySurcharge();
+        const grandTotal = subtotal + surcharge;
+
+        document.getElementById("subtotalPreview").innerText = formatRand(subtotal);
+        document.getElementById("surchargePreview").innerText = surcharge > 0 ? formatRand(surcharge) : "R0.00";
+        document.getElementById("grandTotalPreview").innerText = formatRand(grandTotal);
+    }
+
+    // listen to all inputs
+    function bindInputEvents() {
+        const allNumberInputs = document.querySelectorAll("input[type='number'], select");
+        allNumberInputs.forEach(inp => inp.addEventListener("input", () => updateAllPreviews()));
+        document.querySelectorAll("#manualItemsTable input").forEach(inp => inp.addEventListener("input", () => updateAllPreviews()));
+    }
+
+    // Manual items row management
+    function createManualRow(desc = "", qty = 1, price = 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" class="manual-desc" placeholder="e.g., Cement bags" value="${escapeHtml(desc)}" style="width:140px"></td>
+            <td><input type="number" class="manual-qty" value="${qty}" step="0.5" min="0" style="width:70px"></td>
+            <td><input type="number" class="manual-price" value="${price}" step="1" min="0" style="width:90px"></td>
+            <td class="row-total-preview">R0.00</td>
+            <td><button class="remove-row" type="button">✖</button></td>
+        `;
+        const qtyInput = tr.querySelector(".manual-qty");
+        const priceInput = tr.querySelector(".manual-price");
+        const totalSpan = tr.querySelector(".row-total-preview");
+        const removeBtn = tr.querySelector(".remove-row");
+        
+        const updateRowTotal = () => {
+            let q = parseFloat(qtyInput.value) || 0;
+            let p = parseFloat(priceInput.value) || 0;
+            totalSpan.innerText = formatRand(q * p);
+            updateAllPreviews();
+        };
+        qtyInput.addEventListener("input", updateRowTotal);
+        priceInput.addEventListener("input", updateRowTotal);
+        removeBtn.addEventListener("click", () => {
+            tr.remove();
+            updateAllPreviews();
+        });
+        updateRowTotal();
+        return tr;
+    }
+
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function initManualTable() {
+        manualBody.innerHTML = "";
+        // add 2 sample rows to demonstrate: delivery surcharge item? but we have separate surcharge; show extra materials
+        const row1 = createManualRow("Extra transport (special)", 1, 250);
+        const row2 = createManualRow("Cement (50kg)", 5, 95);
+        manualBody.appendChild(row1);
+        manualBody.appendChild(row2);
+    }
+
+    document.getElementById("addManualRowBtn").addEventListener("click", () => {
+        const newRow = createManualRow("Additional item", 1, 0);
+        manualBody.appendChild(newRow);
+        updateAllPreviews();
+    });
+
+    // MODE SWITCH (invoice / quotation)
+    function setDocumentMode(mode) {
+        currentMode = mode;
+        if (mode === "invoice") {
+            docTypeSpan.innerText = "INVOICE";
+            paidToggleContainer.style.display = "flex";
+            document.getElementById("btnInvoice").classList.add("active");
+            document.getElementById("btnQuotation").classList.remove("active");
+        } else {
+            docTypeSpan.innerText = "QUOTATION";
+            paidToggleContainer.style.display = "none";
+            document.getElementById("btnQuotation").classList.add("active");
+            document.getElementById("btnInvoice").classList.remove("active");
+            paidCheckbox.checked = false; // reset paid stamp when in quotation
+        }
+        updateAllPreviews();
+    }
+
+    // ----- PDF Generation (professional tables) -----
+    async function generateFinalPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let yOffset = 20;
+
+        // Company header
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.text("RAMALEPE BRICKYARD", pageWidth / 2, yOffset, { align: "center" });
+        yOffset += 7;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.text("Premium Clay Bricks | Sand & Aggregates", pageWidth / 2, yOffset, { align: "center" });
+        yOffset += 6;
+        doc.text("12 Industrial Road, Polokwane | Tel: 015 292 1234", pageWidth / 2, yOffset, { align: "center" });
+        yOffset += 8;
+
+        // Document Title
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        const docTitle = currentMode === "invoice" ? "TAX INVOICE" : "QUOTATION";
+        doc.text(docTitle, pageWidth / 2, yOffset, { align: "center" });
+        yOffset += 8;
+        
+        // Client & date
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const client = clientNameInput.value.trim() || "Unspecified client";
+        doc.text(`Client: ${client}`, 20, yOffset);
+        const today = new Date().toLocaleDateString("en-ZA");
+        doc.text(`Date: ${today}`, pageWidth - 40, yOffset);
+        yOffset += 6;
+        const deliveryText = deliverySelect.value === "local" ? "Local Delivery" : "Distant Delivery (+R100 surcharge for sand/stone)";
+        doc.text(`Delivery: ${deliveryText}`, 20, yOffset);
+        yOffset += 10;
+
+        // ----- Build table data: Products -----
+        const tableRows = [];
+        // Bricks section
+        function addRowIfQty(name, qty, unitPrice) {
+            if (qty > 0) tableRows.push([name, qty, `R${unitPrice.toFixed(2)}`, `R${(qty * unitPrice).toFixed(2)}`]);
+        }
+        addRowIfQty("RDP Bricks", parseFloat(rdp.value) || 0, PRICES.rdp);
+        addRowIfQty("Paving Bricks", parseFloat(paving.value) || 0, PRICES.paving);
+        addRowIfQty("ForeHalves", parseFloat(forehalves.value) || 0, PRICES.forehalves);
+        addRowIfQty("Blocks", parseFloat(blocks.value) || 0, PRICES.blocks);
+        addRowIfQty("River Sand (Full)", parseFloat(riverFull.value) || 0, PRICES.riverFull);
+        addRowIfQty("River Sand (Half)", parseFloat(riverHalf.value) || 0, PRICES.riverHalf);
+        addRowIfQty("Concrete Sand (Full)", parseFloat(concreteFull.value) || 0, PRICES.concreteFull);
+        addRowIfQty("Concrete Sand (Half)", parseFloat(concreteHalf.value) || 0, PRICES.concreteHalf);
+        addRowIfQty("Bou Sand (Full)", parseFloat(bouFull.value) || 0, PRICES.bouFull);
+        addRowIfQty("Bou Sand (Half)", parseFloat(bouHalf.value) || 0, PRICES.bouHalf);
+        addRowIfQty("River Stones (Full)", parseFloat(stonesFull.value) || 0, PRICES.stonesFull);
+        addRowIfQty("River Stones (Half)", parseFloat(stonesHalf.value) || 0, PRICES.stonesHalf);
+
+        // Manual custom rows
+        const manualRowsList = manualBody.querySelectorAll("tr");
+        manualRowsList.forEach(row => {
+            const descInput = row.querySelector(".manual-desc");
+            const qtyInput = row.querySelector(".manual-qty");
+            const priceInput = row.querySelector(".manual-price");
+            if (descInput && qtyInput && priceInput) {
+                let desc = descInput.value.trim() || "Custom item";
+                let qty = parseFloat(qtyInput.value) || 0;
+                let price = parseFloat(priceInput.value) || 0;
+                if (qty > 0 && price > 0) {
+                    tableRows.push([desc, qty, `R${price.toFixed(2)}`, `R${(qty * price).toFixed(2)}`]);
+                } else if (qty > 0 || price > 0) {
+                    tableRows.push([desc, qty, `R${price.toFixed(2)}`, `R${(qty * price).toFixed(2)}`]);
+                }
+            }
+        });
+
+        if (tableRows.length === 0) tableRows.push(["No items selected", 0, "R0.00", "R0.00"]);
+
+        // AutoTable
+        doc.autoTable({
+            startY: yOffset,
+            head: [["Description", "Quantity", "Unit Price", "Total"]],
+            body: tableRows,
+            theme: "striped",
+            headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: "bold" },
+            columnStyles: { 0: { cellWidth: 65 }, 1: { cellWidth: 25 }, 2: { cellWidth: 30 }, 3: { cellWidth: 30 } },
+            margin: { left: 20, right: 20 },
+        });
+        yOffset = doc.lastAutoTable.finalY + 6;
+
+        // Totals
+        const subtotalMaterials = computeMaterialsSubtotal();
+        const manualTotal = getManualItemsTotal();
+        let subtotal = subtotalMaterials + manualTotal;
+        const surcharge = getDeliverySurcharge();
+        let grandTotal = subtotal + surcharge;
+
+        doc.setFontSize(10);
+        doc.text(`Subtotal: R${subtotal.toFixed(2)}`, pageWidth - 45, yOffset);
+        yOffset += 5;
+        if (surcharge > 0) doc.text(`Delivery surcharge: R${surcharge.toFixed(2)}`, pageWidth - 45, yOffset);
+        yOffset += 5;
+        doc.setFont("helvetica", "bold");
+        doc.text(`GRAND TOTAL: R${grandTotal.toFixed(2)}`, pageWidth - 50, yOffset);
+        doc.setFont("helvetica", "normal");
+        yOffset += 12;
+
+        // Terms + signature
+        if (currentMode === "invoice") {
+            doc.text("Payment terms: Due within 14 days. EFT reference: invoice number.", 20, yOffset);
+        } else {
+            doc.text("Quotation valid for 30 days. Prices subject to change.", 20, yOffset);
+        }
+        yOffset += 8;
+        doc.text("Thank you for choosing Ramalepe Brickyard!", 20, yOffset);
+
+        // PAID STAMP (only for invoice mode + toggle checked)
+        if (currentMode === "invoice" && paidCheckbox.checked) {
+            doc.setFontSize(48);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(200, 50, 50);
+            doc.text("PAID", pageWidth / 2 + 20, 100, { angle: 25, align: "center" });
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("helvetica", "normal");
+            // add secondary smaller stamp
+            doc.setFontSize(12);
+            doc.text("✓ PAYMENT RECEIVED", pageWidth - 40, 55, { align: "right" });
+        }
+
+        // Optional small logo / footer
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text("Ramalepe Brickyard | Reg No: 2025/123456 | VAT No: 4870212345", pageWidth / 2, 280, { align: "center" });
+        
+        doc.save(currentMode === "invoice" ? `Invoice_${client.replace(/\s/g, "_")}.pdf` : `Quotation_${client.replace(/\s/g, "_")}.pdf`);
+    }
+
+    // Event binding initial
+    window.setDocumentMode = setDocumentMode;
+    window.generateFinalPDF = generateFinalPDF;
+
+    function attachGlobalEvents() {
+        const allInputs = document.querySelectorAll("input, select");
+        allInputs.forEach(el => el.addEventListener("input", () => updateAllPreviews()));
+        updateAllPreviews();
+    }
+
+    initManualTable();
+    setDocumentMode("invoice");
+    attachGlobalEvents();
+    bindInputEvents();
+    updateAllPreviews();
+</script>
 </body>
 </html>
